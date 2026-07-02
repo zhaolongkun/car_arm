@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS_DIR="${ROOT_DIR}/ros2_ws"
 ROS_SETUP="${ROS_SETUP:-/opt/ros/humble/setup.bash}"
+GAZEBO_SETUP="${GAZEBO_SETUP:-/usr/share/gazebo/setup.sh}"
 if [[ -z "${LIVOX_SETUP:-}" ]]; then
   if [[ -n "${LIVOX_WS:-}" ]]; then
     LIVOX_SETUP="${LIVOX_WS}/install/setup.bash"
@@ -57,6 +58,9 @@ GOAL_Y="${GOAL_Y:-10.0}"
 GOAL_YAW="${GOAL_YAW:-0.0}"
 WAYPOINTS="${WAYPOINTS:-[]}"
 SKIP_BUILD="${SKIP_BUILD:-false}"
+ALLOW_MULTIPLE_LAUNCHES="${ALLOW_MULTIPLE_LAUNCHES:-false}"
+AUTO_CLEAN_OLD_PROCESSES="${AUTO_CLEAN_OLD_PROCESSES:-true}"
+CAR_LAUNCH_PATTERN="ros2 launch version_car_sim mid360_fast_lio_mapping.launch.py"
 
 source_setup() {
   set +u
@@ -75,6 +79,9 @@ if [[ ! -d "${WS_DIR}" ]]; then
 fi
 
 source_setup "${ROS_SETUP}"
+if [[ -f "${GAZEBO_SETUP}" ]]; then
+  source_setup "${GAZEBO_SETUP}"
+fi
 
 if [[ "${FAST_LIO_MODE}" == "real" || "${BUILD_FAST_LIO}" == "true" ]]; then
   if [[ ! -f "${LIVOX_SETUP}" ]]; then
@@ -90,6 +97,23 @@ elif [[ -f "${LIVOX_SETUP}" ]]; then
 else
   echo "未找到 livox_ros_driver2 环境，当前 FAST_LIO_MODE=${FAST_LIO_MODE}，将使用 stub 仿真模式跳过 Livox/fast_lio 构建。"
   echo "需要真实 FAST-LIO 时请运行: FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car.sh"
+fi
+
+if [[ "${ALLOW_MULTIPLE_LAUNCHES}" != "true" && "${AUTO_CLEAN_OLD_PROCESSES}" == "true" ]]; then
+  echo "启动前清理旧的小车仿真/Gazebo/RViz 进程，避免 Gazebo 端口冲突..."
+  "${ROOT_DIR}/stop_car_arm.sh" || true
+fi
+
+if [[ "${ALLOW_MULTIPLE_LAUNCHES}" != "true" ]]; then
+  EXISTING_LAUNCHES="$(pgrep -af "${CAR_LAUNCH_PATTERN}" || true)"
+  if [[ -n "${EXISTING_LAUNCHES}" ]]; then
+    echo "检测到已有小车仿真正在运行，请先关闭旧窗口/旧终端里的仿真。" >&2
+    echo "${EXISTING_LAUNCHES}" >&2
+    echo "如果旧终端找不到了，可以执行：" >&2
+    echo "  ./stop_car_arm.sh" >&2
+    echo "确认清干净后再运行 ./start_car.sh。" >&2
+    exit 1
+  fi
 fi
 
 if [[ "${ENABLE_NAVIGATION}" == "true" && "${NAVIGATION_BACKEND}" == "nav2" ]]; then

@@ -4,7 +4,7 @@ set -euo pipefail
 SELF_PID="$$"
 SELF_PGID="$(ps -o pgid= -p "${SELF_PID}" | tr -d ' ')"
 
-MATCH_EXPR='start_car_arm\.sh|train_car_arm_safe_rl\.sh|gas_leak_car_arm_demo\.launch\.py|rebot_arm_motion_debug\.launch\.py|rebot_arm_speed_debug\.launch\.py|gzserver|gzclient|rviz2|fastlio_mapping|move_group|controller_server|planner_server|bt_navigator|behavior_server|smoother_server|waypoint_follower|velocity_smoother|lifecycle_manager|ros2_control_node|robot_state_publisher|joint_state_publisher|static_transform_publisher|parameter_bridge|gas_leak_car_arm_task|gas_leak_mobile_manipulator_task|gas_field_simulator|spray_simulator|rebot_arm_minimal_test|rebot_safe_rl_controller|rebot_safe_rl_gazebo_trainer|spawn_entity\.py'
+MATCH_EXPR='start_car\.sh|start_car_arm\.sh|train_car_arm_safe_rl\.sh|mid360_fast_lio_mapping\.launch\.py|gas_leak_car_arm_demo\.launch\.py|rebot_arm_motion_debug\.launch\.py|rebot_arm_speed_debug\.launch\.py|gzserver|gzclient|rviz2|fastlio_mapping|fast_lio_stub|pointcloud_to_costmap|nav2_waypoint_commander|cmd_vel_monitor|trajectory_recorder|mapping_drive_node|controller_server|planner_server|bt_navigator|behavior_server|smoother_server|waypoint_follower|velocity_smoother|lifecycle_manager|ros2_control_node|robot_state_publisher|joint_state_publisher|static_transform_publisher|parameter_bridge|gas_leak_car_arm_task|gas_leak_mobile_manipulator_task|gas_field_simulator|spray_simulator|rebot_arm_minimal_test|rebot_safe_rl_controller|rebot_safe_rl_gazebo_trainer|spawn_entity\.py'
 
 matching_processes() {
   ps -eo pid=,ppid=,pgid=,stat=,etime=,cmd= | awk \
@@ -67,4 +67,4 @@ if [[ -n "${final_matches}" ]]; then
   exit 1
 fi
 
-echo "已清理完成，可以重新运行 ./start_car_arm.sh。"
+echo "已清理完成，可以重新运行 ./start_car.sh 或 ./start_car_arm.sh。"

@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, LogInfo, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, LogInfo, OpaqueFunction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch.conditions import IfCondition
@@ -97,8 +97,6 @@ def check_nav2_available():
 
 def launch_setup(context, *args, **kwargs):
     package_share = get_package_share_directory('version_car_sim')
-    gazebo_share = get_package_share_directory('gazebo_ros')
-
     config_worlds_dir = os.path.join(package_share, 'config', 'worlds')
     config_rviz_dir = os.path.join(package_share, 'config', 'rviz')
 
@@ -196,15 +194,20 @@ def launch_setup(context, *args, **kwargs):
         LogInfo(msg=f'vehicle_safety_radius={vehicle_safety_radius:.3f} m'),
         LogInfo(msg='=' * 60),
 
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(
-                os.path.join(gazebo_share, 'launch', 'gazebo.launch.py')
-            ),
-            launch_arguments={
-                'world': world_path,
-                'gui': gui,
-                'verbose': 'false',
-            }.items(),
+        ExecuteProcess(
+            cmd=[
+                'gzserver',
+                world_path,
+                '-s', 'libgazebo_ros_init.so',
+                '-s', 'libgazebo_ros_factory.so',
+                '-s', 'libgazebo_ros_force_system.so',
+            ],
+            output='screen',
+        ),
+        ExecuteProcess(
+            cmd=['gzclient'],
+            condition=IfCondition(gui),
+            output='screen',
         ),
     ]
 

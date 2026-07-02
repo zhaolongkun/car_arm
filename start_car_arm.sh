@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS_DIR="${ROOT_DIR}/ros2_ws"
 ROS_SETUP="${ROS_SETUP:-/opt/ros/humble/setup.bash}"
+GAZEBO_SETUP="${GAZEBO_SETUP:-/usr/share/gazebo/setup.sh}"
 if [[ -z "${LIVOX_SETUP:-}" ]]; then
   if [[ -n "${LIVOX_WS:-}" ]]; then
     LIVOX_SETUP="${LIVOX_WS}/install/setup.bash"
@@ -134,6 +135,9 @@ if [[ ! -d "${WS_DIR}" ]]; then
 fi
 
 source_setup "${ROS_SETUP}"
+if [[ -f "${GAZEBO_SETUP}" ]]; then
+  source_setup "${GAZEBO_SETUP}"
+fi
 
 if [[ "${FAST_LIO_MODE}" == "real" || "${BUILD_FAST_LIO}" == "true" ]]; then
   if [[ ! -f "${LIVOX_SETUP}" ]]; then

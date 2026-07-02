@@ -68,6 +68,14 @@ source_setup() {
   set -u
 }
 
+ensure_symlink() {
+  local link_path="$1"
+  local target_path="$2"
+  if [[ ! -e "${link_path}" && -e "${target_path}" ]]; then
+    ln -s "${target_path}" "${link_path}"
+  fi
+}
+
 if [[ ! -f "${ROS_SETUP}" ]]; then
   echo "找不到 ROS 环境文件: ${ROS_SETUP}" >&2
   exit 1
@@ -116,6 +124,15 @@ if [[ "${ALLOW_MULTIPLE_LAUNCHES}" != "true" ]]; then
   fi
 fi
 
+REBOT_SRC="${WS_DIR}/src/_external_rebot/reBotArmController_ROS2/src"
+if [[ -d "${REBOT_SRC}" ]]; then
+  ensure_symlink "${WS_DIR}/src/rebotarm_msgs" "_external_rebot/reBotArmController_ROS2/src/rebotarm_msgs"
+  ensure_symlink "${WS_DIR}/src/rebotarmcontroller" "_external_rebot/reBotArmController_ROS2/src/rebotarmcontroller"
+  ensure_symlink "${WS_DIR}/src/rebotarm_bringup" "_external_rebot/reBotArmController_ROS2/src/rebotarm_bringup"
+  ensure_symlink "${WS_DIR}/src/rebotarm_moveit_config" "_external_rebot/reBotArmController_ROS2/src/rebotarm_moveit_config"
+  ensure_symlink "${WS_DIR}/src/rebotarm_moveit_demos" "_external_rebot/reBotArmController_ROS2/src/rebotarm_moveit_demos"
+fi
+
 if [[ "${ENABLE_NAVIGATION}" == "true" && "${NAVIGATION_BACKEND}" == "nav2" ]]; then
   if ! ros2 pkg prefix nav2_bringup >/dev/null 2>&1; then
     echo "当前系统没有安装 ROS2 Nav2，但 NAVIGATION_BACKEND=nav2。" >&2
@@ -131,7 +148,13 @@ fi
 cd "${WS_DIR}"
 
 if [[ "${SKIP_BUILD}" != "true" ]]; then
-  build_packages=(version_car_sim)
+  build_packages=(
+    rebotarm_msgs
+    rebotarmcontroller
+    rebotarm_bringup
+    rebotarm_moveit_config
+    version_car_sim
+  )
   if [[ "${BUILD_FAST_LIO}" == "true" ]]; then
     build_packages=(fast_lio "${build_packages[@]}")
   fi

@@ -22,6 +22,14 @@ LIVOX_SETUP="${LIVOX_SETUP:-}"
 GUI="${GUI:-true}"
 RVIZ="${RVIZ:-true}"
 FAST_LIO_MODE="${FAST_LIO_MODE:-stub}"
+BUILD_FAST_LIO="${BUILD_FAST_LIO:-auto}"
+if [[ "${BUILD_FAST_LIO}" == "auto" ]]; then
+  if [[ "${FAST_LIO_MODE}" == "real" ]]; then
+    BUILD_FAST_LIO="true"
+  else
+    BUILD_FAST_LIO="false"
+  fi
+fi
 WORLD_FILE="${WORLD_FILE:-mid360_fast_lio_world.world}"
 CAR_MODEL_FILE="${CAR_MODEL_FILE:-version_car_mid360_rebot_b601_dm.sdf}"
 RVIZ_CONFIG_FILE="${RVIZ_CONFIG_FILE:-mid360_fast_lio_mapping.rviz}"
@@ -120,15 +128,27 @@ if [[ ! -f "${ROS_SETUP}" ]]; then
   exit 1
 fi
 
-if [[ ! -f "${LIVOX_SETUP}" ]]; then
-  echo "找不到 livox_ros_driver2 依赖环境: ${LIVOX_SETUP}" >&2
-  echo "可以把 Livox 工作区放到 ./third_party/ws_livox，或通过 LIVOX_WS=/path/to/ws_livox 指定。" >&2
-  exit 1
-fi
-
 if [[ ! -d "${WS_DIR}" ]]; then
   echo "找不到 ROS2 工作区: ${WS_DIR}" >&2
   exit 1
+fi
+
+source_setup "${ROS_SETUP}"
+
+if [[ "${FAST_LIO_MODE}" == "real" || "${BUILD_FAST_LIO}" == "true" ]]; then
+  if [[ ! -f "${LIVOX_SETUP}" ]]; then
+    echo "找不到 livox_ros_driver2 依赖环境: ${LIVOX_SETUP}" >&2
+    echo "FAST_LIO_MODE=real 或 BUILD_FAST_LIO=true 时需要 Livox 工作区。" >&2
+    echo "可以把 Livox 工作区放到 ./third_party/ws_livox，或通过 LIVOX_WS=/path/to/ws_livox 指定。" >&2
+    echo "如果只是运行 Gazebo 仿真演示，请使用默认 FAST_LIO_MODE=stub，不需要 Livox。" >&2
+    exit 1
+  fi
+  source_setup "${LIVOX_SETUP}"
+elif [[ -f "${LIVOX_SETUP}" ]]; then
+  source_setup "${LIVOX_SETUP}"
+else
+  echo "未找到 livox_ros_driver2 环境，当前 FAST_LIO_MODE=${FAST_LIO_MODE}，将使用 stub 仿真模式跳过 Livox/fast_lio 构建。"
+  echo "需要真实 FAST-LIO 时请运行: FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh"
 fi
 
 if [[ "${ALLOW_MULTIPLE_LAUNCHES}" != "true" && "${AUTO_CLEAN_OLD_PROCESSES}" == "true" ]]; then
@@ -157,9 +177,6 @@ if [[ -d "${REBOT_SRC}" ]]; then
   ensure_symlink "${WS_DIR}/src/rebotarm_moveit_demos" "_external_rebot/reBotArmController_ROS2/src/rebotarm_moveit_demos"
 fi
 
-source_setup "${ROS_SETUP}"
-source_setup "${LIVOX_SETUP}"
-
 if ! ros2 pkg prefix nav2_bringup >/dev/null 2>&1; then
   echo "当前系统没有安装 ROS2 Nav2，请先安装：" >&2
   echo "  sudo apt update" >&2
@@ -171,15 +188,19 @@ cd "${WS_DIR}"
 
 if [[ "${SKIP_BUILD}" != "true" ]]; then
   echo "开始构建 ros2_ws: 小车 + reBot B601-DM 联合仿真..."
-  colcon build --symlink-install --packages-select \
-    fast_lio \
-    rebotarm_msgs \
-    rebotarmcontroller \
-    rebotarm_bringup \
-    rebotarm_moveit_config \
-    rebotarm_moveit_demos \
-    rebot_gas_spray_demo \
+  build_packages=(
+    rebotarm_msgs
+    rebotarmcontroller
+    rebotarm_bringup
+    rebotarm_moveit_config
+    rebotarm_moveit_demos
+    rebot_gas_spray_demo
     version_car_sim
+  )
+  if [[ "${BUILD_FAST_LIO}" == "true" ]]; then
+    build_packages=(fast_lio "${build_packages[@]}")
+  fi
+  colcon build --symlink-install --packages-select "${build_packages[@]}"
 fi
 
 source_setup "${WS_DIR}/install/setup.bash"

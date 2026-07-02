@@ -23,7 +23,15 @@ GUI="${GUI:-true}"
 RVIZ="${RVIZ:-true}"
 WORLD_FILE="${WORLD_FILE:-mid360_fast_lio_world.world}"
 RVIZ_CONFIG_FILE="${RVIZ_CONFIG_FILE:-mid360_fast_lio_mapping.rviz}"
-FAST_LIO_MODE="${FAST_LIO_MODE:-real}"
+FAST_LIO_MODE="${FAST_LIO_MODE:-stub}"
+BUILD_FAST_LIO="${BUILD_FAST_LIO:-auto}"
+if [[ "${BUILD_FAST_LIO}" == "auto" ]]; then
+  if [[ "${FAST_LIO_MODE}" == "real" ]]; then
+    BUILD_FAST_LIO="true"
+  else
+    BUILD_FAST_LIO="false"
+  fi
+fi
 ENABLE_MAPPING_DRIVE="${ENABLE_MAPPING_DRIVE:-false}"
 ENABLE_NAVIGATION="${ENABLE_NAVIGATION:-true}"
 NAVIGATION_BACKEND="${NAVIGATION_BACKEND:-nav2}"
@@ -61,19 +69,28 @@ if [[ ! -f "${ROS_SETUP}" ]]; then
   exit 1
 fi
 
-if [[ ! -f "${LIVOX_SETUP}" ]]; then
-  echo "找不到 livox_ros_driver2 依赖环境: ${LIVOX_SETUP}" >&2
-  echo "可以把 Livox 工作区放到 ./third_party/ws_livox，或通过 LIVOX_WS=/path/to/ws_livox 指定。" >&2
-  exit 1
-fi
-
 if [[ ! -d "${WS_DIR}" ]]; then
   echo "找不到 ROS2 工作区: ${WS_DIR}" >&2
   exit 1
 fi
 
 source_setup "${ROS_SETUP}"
-source_setup "${LIVOX_SETUP}"
+
+if [[ "${FAST_LIO_MODE}" == "real" || "${BUILD_FAST_LIO}" == "true" ]]; then
+  if [[ ! -f "${LIVOX_SETUP}" ]]; then
+    echo "找不到 livox_ros_driver2 依赖环境: ${LIVOX_SETUP}" >&2
+    echo "FAST_LIO_MODE=real 或 BUILD_FAST_LIO=true 时需要 Livox 工作区。" >&2
+    echo "可以把 Livox 工作区放到 ./third_party/ws_livox，或通过 LIVOX_WS=/path/to/ws_livox 指定。" >&2
+    echo "如果只是运行 Gazebo 仿真演示，请使用默认 FAST_LIO_MODE=stub，不需要 Livox。" >&2
+    exit 1
+  fi
+  source_setup "${LIVOX_SETUP}"
+elif [[ -f "${LIVOX_SETUP}" ]]; then
+  source_setup "${LIVOX_SETUP}"
+else
+  echo "未找到 livox_ros_driver2 环境，当前 FAST_LIO_MODE=${FAST_LIO_MODE}，将使用 stub 仿真模式跳过 Livox/fast_lio 构建。"
+  echo "需要真实 FAST-LIO 时请运行: FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car.sh"
+fi
 
 if [[ "${ENABLE_NAVIGATION}" == "true" && "${NAVIGATION_BACKEND}" == "nav2" ]]; then
   if ! ros2 pkg prefix nav2_bringup >/dev/null 2>&1; then
@@ -90,8 +107,12 @@ fi
 cd "${WS_DIR}"
 
 if [[ "${SKIP_BUILD}" != "true" ]]; then
-  echo "开始构建 ros2_ws/fast_lio 和 ros2_ws/version_car_sim..."
-  colcon build --symlink-install --packages-select fast_lio version_car_sim
+  build_packages=(version_car_sim)
+  if [[ "${BUILD_FAST_LIO}" == "true" ]]; then
+    build_packages=(fast_lio "${build_packages[@]}")
+  fi
+  echo "开始构建 ros2_ws: ${build_packages[*]}"
+  colcon build --symlink-install --packages-select "${build_packages[@]}"
 fi
 
 source_setup "${WS_DIR}/install/setup.bash"

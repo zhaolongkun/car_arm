@@ -52,6 +52,8 @@ sudo apt install ros-humble-xacro ros-humble-robot-state-publisher ros-humble-jo
 sudo apt install python3-colcon-common-extensions python3-pip
 ```
 
+默认启动使用 `FAST_LIO_MODE=stub`，只做 Gazebo 仿真演示时不需要 `livox_ros_driver2`。
+
 如果使用真实 FAST-LIO / Livox 驱动，需要准备 `livox_ros_driver2` 工作区。启动脚本会自动查找：
 
 ```text
@@ -59,10 +61,10 @@ sudo apt install python3-colcon-common-extensions python3-pip
 ../livox/ws_livox
 ```
 
-也可以手动指定：
+也可以手动指定，并切换到真实 FAST-LIO：
 
 ```bash
-LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
+FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
 ```
 
 ## 编译

@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<robot name="mobile_rebot_b601_dm">
+  <group name="arm">
+    <chain base_link="rebot_base_link" tip_link="spray_tip_link"/>
+  </group>
+
+  <group name="gripper">
+    <joint name="gripper_joint1"/>
+    <joint name="gripper_joint2"/>
+  </group>
+
+  <group_state name="home" group="arm">
+    <joint name="joint1" value="0.0"/>
+    <joint name="joint2" value="0.0"/>
+    <joint name="joint3" value="0.0"/>
+    <joint name="joint4" value="0.0"/>
+    <joint name="joint5" value="0.0"/>
+    <joint name="joint6" value="0.0"/>
+  </group_state>
+
+  <group_state name="spray_ready" group="arm">
+    <joint name="joint1" value="0.0"/>
+    <joint name="joint2" value="-0.65"/>
+    <joint name="joint3" value="-1.45"/>
+    <joint name="joint4" value="0.15"/>
+    <joint name="joint5" value="0.75"/>
+    <joint name="joint6" value="0.0"/>
+  </group_state>
+
+  <group_state name="open" group="gripper">
+    <joint name="gripper_joint1" value="0.0715"/>
+    <joint name="gripper_joint2" value="0.0715"/>
+  </group_state>
+
+  <group_state name="closed" group="gripper">
+    <joint name="gripper_joint1" value="0.0"/>
+    <joint name="gripper_joint2" value="0.0"/>
+  </group_state>
+
+  <end_effector name="spray_nozzle" parent_link="spray_tip_link" group="gripper" parent_group="arm"/>
+
+  <disable_collisions link1="rebot_base_link" link2="link1" reason="Adjacent"/>
+  <disable_collisions link1="link1" link2="link2" reason="Adjacent"/>
+  <disable_collisions link1="link2" link2="link3" reason="Adjacent"/>
+  <disable_collisions link1="link3" link2="link4" reason="Adjacent"/>
+  <disable_collisions link1="link4" link2="link5" reason="Adjacent"/>
+  <disable_collisions link1="link5" link2="link6" reason="Adjacent"/>
+  <disable_collisions link1="link6" link2="gripper_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_link" link2="gripper_left" reason="Adjacent"/>
+  <disable_collisions link1="gripper_link" link2="gripper_right" reason="Adjacent"/>
+  <disable_collisions link1="gripper_link" link2="gripper_tcp" reason="Adjacent"/>
+  <disable_collisions link1="gripper_link" link2="spray_nozzle_link" reason="Attached"/>
+  <disable_collisions link1="gripper_left" link2="spray_nozzle_link" reason="Attached"/>
+  <disable_collisions link1="gripper_right" link2="spray_nozzle_link" reason="Attached"/>
+  <disable_collisions link1="gripper_tcp" link2="spray_nozzle_link" reason="Adjacent"/>
+  <disable_collisions link1="spray_nozzle_link" link2="spray_tip_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_link" link2="spray_tip_link" reason="Attached"/>
+  <disable_collisions link1="gripper_left" link2="spray_tip_link" reason="Attached"/>
+  <disable_collisions link1="gripper_right" link2="spray_tip_link" reason="Attached"/>
+  <disable_collisions link1="gripper_tcp" link2="spray_tip_link" reason="Adjacent"/>
+  <disable_collisions link1="gripper_left" link2="gripper_tcp" reason="Never"/>
+  <disable_collisions link1="gripper_right" link2="gripper_tcp" reason="Never"/>
+  <disable_collisions link1="gripper_left" link2="gripper_right" reason="Never"/>
+</robot>

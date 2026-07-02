@@ -1,0 +1,24 @@
+# Build and install outputs
+build/
+install/
+log/
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Runtime outputs
+ros2_ws/sim_results/
+*.log
+*.pid
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Optional large/unused third-party copy; FAST_LIO_ROS2 is the package used by start scripts.
+ros2_ws/src/fast_lio/

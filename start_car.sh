@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WS_DIR="${ROOT_DIR}/ros2_ws"
+ROS_SETUP="${ROS_SETUP:-/opt/ros/humble/setup.bash}"
+if [[ -z "${LIVOX_SETUP:-}" ]]; then
+  if [[ -n "${LIVOX_WS:-}" ]]; then
+    LIVOX_SETUP="${LIVOX_WS}/install/setup.bash"
+  else
+    for candidate in "${ROOT_DIR}/third_party/ws_livox" "${ROOT_DIR}/../livox/ws_livox"; do
+      if [[ -f "${candidate}/install/setup.bash" ]]; then
+        LIVOX_WS="${candidate}"
+        LIVOX_SETUP="${candidate}/install/setup.bash"
+        break
+      fi
+    done
+  fi
+fi
+LIVOX_SETUP="${LIVOX_SETUP:-}"
+
+GUI="${GUI:-true}"
+RVIZ="${RVIZ:-true}"
+WORLD_FILE="${WORLD_FILE:-mid360_fast_lio_world.world}"
+RVIZ_CONFIG_FILE="${RVIZ_CONFIG_FILE:-mid360_fast_lio_mapping.rviz}"
+FAST_LIO_MODE="${FAST_LIO_MODE:-real}"
+ENABLE_MAPPING_DRIVE="${ENABLE_MAPPING_DRIVE:-false}"
+ENABLE_NAVIGATION="${ENABLE_NAVIGATION:-true}"
+NAVIGATION_BACKEND="${NAVIGATION_BACKEND:-nav2}"
+START_X="${START_X:--10.0}"
+START_Y="${START_Y:--10.0}"
+if [[ -z "${START_YAW+x}" ]]; then
+  START_YAW="$(python3 - "${START_X}" "${START_Y}" <<'PY'
+import math
+import sys
+
+x = float(sys.argv[1])
+y = float(sys.argv[2])
+if abs(x) < 1e-9 and abs(y) < 1e-9:
+    yaw = 0.0
+else:
+    yaw = math.atan2(-y, -x)
+print(f'{yaw:.6f}')
+PY
+)"
+fi
+GOAL_X="${GOAL_X:-10.0}"
+GOAL_Y="${GOAL_Y:-10.0}"
+GOAL_YAW="${GOAL_YAW:-0.0}"
+WAYPOINTS="${WAYPOINTS:-[]}"
+SKIP_BUILD="${SKIP_BUILD:-false}"
+
+source_setup() {
+  set +u
+  source "$1"
+  set -u
+}
+
+if [[ ! -f "${ROS_SETUP}" ]]; then
+  echo "找不到 ROS 环境文件: ${ROS_SETUP}" >&2
+  exit 1
+fi
+
+if [[ ! -f "${LIVOX_SETUP}" ]]; then
+  echo "找不到 livox_ros_driver2 依赖环境: ${LIVOX_SETUP}" >&2
+  echo "可以把 Livox 工作区放到 ./third_party/ws_livox，或通过 LIVOX_WS=/path/to/ws_livox 指定。" >&2
+  exit 1
+fi
+
+if [[ ! -d "${WS_DIR}" ]]; then
+  echo "找不到 ROS2 工作区: ${WS_DIR}" >&2
+  exit 1
+fi
+
+source_setup "${ROS_SETUP}"
+source_setup "${LIVOX_SETUP}"
+
+if [[ "${ENABLE_NAVIGATION}" == "true" && "${NAVIGATION_BACKEND}" == "nav2" ]]; then
+  if ! ros2 pkg prefix nav2_bringup >/dev/null 2>&1; then
+    echo "当前系统没有安装 ROS2 Nav2，但 NAVIGATION_BACKEND=nav2。" >&2
+    echo "请先安装：" >&2
+    echo "  sudo apt update" >&2
+    echo "  sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup" >&2
+    echo "安装后重新运行 ./start_3d_fastlio.sh" >&2
+    echo "临时退回旧算法可用：NAVIGATION_BACKEND=custom ./start_3d_fastlio.sh" >&2
+    exit 1
+  fi
+fi
+
+cd "${WS_DIR}"
+
+if [[ "${SKIP_BUILD}" != "true" ]]; then
+  echo "开始构建 ros2_ws/fast_lio 和 ros2_ws/version_car_sim..."
+  colcon build --symlink-install --packages-select fast_lio version_car_sim
+fi
+
+source_setup "${WS_DIR}/install/setup.bash"
+
+echo "启动 MID360 + FAST-LIO 三维建图..."
+launch_args=(
+  "gui:=${GUI}"
+  "rviz:=${RVIZ}"
+  "world_file:=${WORLD_FILE}"
+  "rviz_config_file:=${RVIZ_CONFIG_FILE}"
+  "fast_lio_mode:=${FAST_LIO_MODE}"
+  "enable_mapping_drive:=${ENABLE_MAPPING_DRIVE}"
+  "enable_navigation:=${ENABLE_NAVIGATION}"
+  "navigation_backend:=${NAVIGATION_BACKEND}"
+  "start_x:=${START_X}"
+  "start_y:=${START_Y}"
+  "start_yaw:=${START_YAW}"
+  "goal_x:=${GOAL_X}"
+  "goal_y:=${GOAL_Y}"
+  "goal_yaw:=${GOAL_YAW}"
+)
+
+if [[ "${WAYPOINTS}" != "[]" ]]; then
+  launch_args+=("waypoints:=${WAYPOINTS}")
+fi
+
+ros2 launch version_car_sim mid360_fast_lio_mapping.launch.py "${launch_args[@]}"

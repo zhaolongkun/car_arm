@@ -1,0 +1,51 @@
+# FAST-LIO 参数配置文件 — 仿真模式（Gazebo Livox MID360 + 模拟 IMU）
+#
+# 当 FAST-LIO 编译就绪后，将此文件作为参数传入 FAST-LIO 节点。
+# 话题名称和 frame_id 已调整为与 version_car_livox3d.sdf 一致。
+#
+# 使用方法（假定 FAST-LIO2 ROS2 节点名为 fastlio_mapping）：
+#   ros2 run fast_lio fastlio_mapping \
+#     --ros-args -p config_file:=/path/to/config/fast_lio/mid360_sim.yaml
+#
+# ── 与真实 MID360 的区别 ─────────────────────────────────────────────────
+# 仿真环境                ->  真实硬件
+# /mid360_points          ->  /livox/lidar（livox_ros_driver2 发布）
+# /imu                    ->  /livox/imu
+# frame_id: mid360_link   ->  frame_id: livox_frame
+# Gazebo noise 近似       ->  真实传感器噪声
+
+common:
+    lid_topic:  "/mid360_points"        # Gazebo MID360 仿真发布的 3D 点云话题。
+    imu_topic:  "/imu"                  # Gazebo IMU 仿真发布的 IMU 话题。
+    time_sync_en: false                 # 仿真环境中时间已经同步，无需外部同步。
+    time_offset_lidar_to_imu: 0.0       # 激光雷达和 IMU 的时间偏移（已同步）。
+
+preprocess:
+    lidar_type: 1                       # 1= Livox 系列（MID360 兼容）,
+                                        # 2= Velodyne, 3= Ouster, 4= 自定义。
+    scan_line: 4                        # MID360 的扫描线数（仿真中用 32 线，设为 4~8 可加速）。
+    blind: 0.5                          # 近处盲区（米），MID360 盲区约 0.3~0.5 m。
+
+mapping:
+    acc_cov: 0.1                        # 加速度计协方差（仿真噪声较小）。
+    gyr_cov: 0.1                        # 陀螺仪协方差。
+    b_acc_cov: 0.0001                   # 加速度计偏置协方差。
+    b_gyr_cov: 0.0001                   # 陀螺仪偏置协方差。
+    fov_degree: 360                     # MID360 水平视场角 360°。
+    det_range: 40.0                     # 有效探测距离（米），仿真中设为 40 m，与传感器 max 一致。
+    extrinsic_est_en: false             # Gazebo 中 IMU 和 LiDAR 在同一 link 上，外参已知，
+                                        # 无需在线标定。
+    extrinsic_T: [ 0.0, 0.0, 0.0 ]     # IMU-LiDAR 平移外参（同一 link，零偏移）。
+    extrinsic_R: [ 1, 0, 0,            # IMU-LiDAR 旋转外参（单位阵）。
+                   0, 1, 0,
+                   0, 0, 1]
+
+publish:
+    path_en: true                       # 启用路径发布（供 RViz 可视化）。
+    scan_publish_en: true               # 启用点云扫描发布。
+    dense_publish_en: true              # 启用稠密全局点云发布。
+    scan_bodyframe_pub_en: true         # 启用车体系点云发布。
+
+pcd_save:
+    pcd_save_en: false                  # 仿真模式下通常不需要保存 PCD 文件。
+    interval: -1                        # 保存间隔，-1 表示全部保存（当 pcd_save_en=true 时）。

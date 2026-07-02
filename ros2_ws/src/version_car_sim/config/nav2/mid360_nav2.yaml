@@ -1,0 +1,283 @@
+bt_navigator: # Nav2 行为树导航器主节点配置
+  ros__parameters: # 该节点的 ROS2 参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    global_frame: map # 全局导航坐标系为 map
+    robot_base_frame: base_link # 机器人本体坐标系为 base_link
+    odom_topic: /odom # 里程计话题
+    bt_loop_duration: 10 # 行为树循环周期，单位毫秒
+    default_server_timeout: 20 # 行为树动作服务器默认等待超时，单位秒
+    wait_for_service_timeout: 1000 # 等待服务可用的超时时间，单位毫秒
+    default_bt_xml_filename: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml # 默认导航行为树文件，带清图/后退/旋转恢复
+    default_nav_to_pose_bt_xml: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml # NavigateToPose 使用的行为树文件
+    plugin_lib_names: # 行为树可加载插件列表
+      - nav2_compute_path_to_pose_action_bt_node # 计算到单个目标点路径的 BT 节点
+      - nav2_compute_path_through_poses_action_bt_node # 计算经过多个目标点路径的 BT 节点
+      - nav2_smooth_path_action_bt_node # 路径平滑 BT 节点
+      - nav2_follow_path_action_bt_node # 跟随路径 BT 节点
+      - nav2_spin_action_bt_node # 原地旋转恢复动作节点
+      - nav2_wait_action_bt_node # 等待恢复动作节点
+      - nav2_assisted_teleop_action_bt_node # 辅助遥操作动作节点
+      - nav2_back_up_action_bt_node # 后退恢复动作节点
+      - nav2_drive_on_heading_bt_node # 按指定朝向直行的动作节点
+      - nav2_clear_costmap_service_bt_node # 清理代价地图服务节点
+      - nav2_is_stuck_condition_bt_node # 判断机器人是否卡住的条件节点
+      - nav2_goal_reached_condition_bt_node # 判断是否到达目标的条件节点
+      - nav2_goal_updated_condition_bt_node # 判断目标是否更新的条件节点
+      - nav2_globally_updated_goal_condition_bt_node # 判断全局目标是否更新的条件节点
+      - nav2_is_path_valid_condition_bt_node # 判断路径是否仍然有效的条件节点
+      - nav2_initial_pose_received_condition_bt_node # 判断是否收到初始位姿的条件节点
+      - nav2_reinitialize_global_localization_service_bt_node # 重新初始化全局定位服务节点
+      - nav2_rate_controller_bt_node # 控制行为树 tick 频率的节点
+      - nav2_distance_controller_bt_node # 按距离触发行为的控制节点
+      - nav2_speed_controller_bt_node # 按速度触发行为的控制节点
+      - nav2_truncate_path_action_bt_node # 截断全局路径动作节点
+      - nav2_truncate_path_local_action_bt_node # 截断局部路径动作节点
+      - nav2_goal_updater_node_bt_node # 目标更新节点
+      - nav2_recovery_node_bt_node # 恢复行为节点
+      - nav2_pipeline_sequence_bt_node # 管线顺序执行节点
+      - nav2_round_robin_node_bt_node # 轮询恢复行为节点
+      - nav2_transform_available_condition_bt_node # 判断 TF 是否可用的条件节点
+      - nav2_time_expired_condition_bt_node # 判断时间是否过期的条件节点
+      - nav2_path_expiring_timer_condition # 判断路径是否需要过期更新的条件节点
+      - nav2_distance_traveled_condition_bt_node # 判断已行驶距离的条件节点
+      - nav2_single_trigger_bt_node # 单次触发节点
+      - nav2_goal_updated_controller_bt_node # 控制器侧目标更新节点
+      - nav2_is_battery_low_condition_bt_node # 判断电量低的条件节点
+      - nav2_navigate_through_poses_action_bt_node # 多目标点导航动作节点
+      - nav2_navigate_to_pose_action_bt_node # 单目标点导航动作节点
+      - nav2_remove_passed_goals_action_bt_node # 移除已经经过目标点的动作节点
+      - nav2_planner_selector_bt_node # 规划器选择节点
+      - nav2_controller_selector_bt_node # 控制器选择节点
+      - nav2_goal_checker_selector_bt_node # 目标检查器选择节点
+      - nav2_controller_cancel_bt_node # 取消控制器动作节点
+      - nav2_path_longer_on_approach_bt_node # 接近目标时判断路径是否变长的节点
+      - nav2_wait_cancel_bt_node # 取消等待动作节点
+      - nav2_spin_cancel_bt_node # 取消旋转动作节点
+      - nav2_back_up_cancel_bt_node # 取消后退动作节点
+      - nav2_assisted_teleop_cancel_bt_node # 取消辅助遥操作动作节点
+      - nav2_drive_on_heading_cancel_bt_node # 取消按朝向直行动作节点
+      - nav2_is_battery_charging_condition_bt_node # 判断电池是否正在充电的条件节点
+# 分隔：NavigateThroughPoses 行为树节点参数
+bt_navigator_navigate_through_poses_rclcpp_node: # 多目标导航 BT 内部节点配置
+  ros__parameters: # 该内部节点的 ROS2 参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+# 分隔：NavigateToPose 行为树节点参数
+bt_navigator_navigate_to_pose_rclcpp_node: # 单目标导航 BT 内部节点配置
+  ros__parameters: # 该内部节点的 ROS2 参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+# 分隔：局部控制器配置
+controller_server: # Nav2 控制器服务器配置
+  ros__parameters: # 控制器服务器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    controller_frequency: 10.0 # 控制器输出速度频率，单位 Hz；Gazebo+机械臂场景负载较高，10Hz 更不易漏周期
+    min_x_velocity_threshold: 0.001 # x 方向速度小于该值视为 0
+    min_y_velocity_threshold: 0.5 # y 方向速度阈值，差速车不使用横移
+    min_theta_velocity_threshold: 0.001 # 角速度小于该值视为 0
+    failure_tolerance: 0.3 # 控制失败容忍时间，单位秒
+    progress_checker_plugin: progress_checker # 使用的进展检查器插件名
+    goal_checker_plugins: [general_goal_checker] # 使用的目标到达检查器列表
+    controller_plugins: [FollowPath] # 使用的局部控制器插件列表
+    progress_checker: # 进展检查器参数块
+      plugin: nav2_controller::SimpleProgressChecker # 简单进展检查器插件类型
+      required_movement_radius: 0.08 # 贴障碍绕行时允许慢速调整，避免过早判定卡死
+      movement_time_allowance: 30.0 # 允许慢速脱困/倒车/转向的最长时间，单位秒
+    general_goal_checker: # 通用目标检查器参数块
+      plugin: nav2_controller::SimpleGoalChecker # 简单目标检查器插件类型
+      stateful: true # 到达目标后保持检查状态
+      xy_goal_tolerance: 0.15 # 目标位置 xy 容差，单位米
+      yaw_goal_tolerance: 1.57 # 目标朝向 yaw 容差，单位弧度；机械臂可转向泄漏点，避免车贴障碍物后原地硬转
+    FollowPath: # DWB 局部路径跟随控制器参数块
+      plugin: dwb_core::DWBLocalPlanner # 使用 DWB 局部规划器
+      debug_trajectory_details: false # 不输出每条候选轨迹的详细调试信息
+      min_vel_x: -0.12 # 最小前进速度，单位 m/s；允许倒车脱困
+      min_vel_y: 0.0 # 最小横向速度，差速车保持 0
+      max_vel_x: 0.24 # 最大前进速度，单位 m/s
+      max_vel_y: 0.0 # 最大横向速度，差速车保持 0
+      max_vel_theta: 1.90 # 最大角速度，单位 rad/s
+      min_speed_xy: 0.0 # 平面最小线速度
+      max_speed_xy: 0.24 # 平面最大线速度
+      min_speed_theta: 0.0 # 最小角速度
+      acc_lim_x: 0.70 # x 方向最大加速度，单位 m/s^2
+      acc_lim_y: 0.0 # y 方向最大加速度，差速车为 0
+      acc_lim_theta: 4.2 # 最大角加速度，单位 rad/s^2
+      decel_lim_x: -0.85 # x 方向最大减速度，单位 m/s^2
+      decel_lim_y: 0.0 # y 方向最大减速度，差速车为 0
+      decel_lim_theta: -4.5 # 最大角减速度，单位 rad/s^2
+      vx_samples: 32 # 前进速度采样数量，增加倒车/慢速绕行候选
+      vy_samples: 1 # 横向速度采样数量，差速车只采 1 个
+      vtheta_samples: 80 # 角速度采样数量
+      sim_time: 2.0 # 每条候选轨迹前向模拟时间，单位秒；让控制器看见更长的绕行动作
+      linear_granularity: 0.04 # 轨迹线性采样间隔，单位米
+      angular_granularity: 0.025 # 轨迹角度采样间隔，单位弧度
+      transform_tolerance: 0.2 # TF 查询容忍时间，单位秒
+      xy_goal_tolerance: 0.15 # 控制器目标位置容差，单位米
+      trans_stopped_velocity: 0.05 # 线速度低于该值视为停止
+      short_circuit_trajectory_evaluation: false # 不短路评分，完整评估全部 critic
+      stateful: true # 控制器保持内部状态
+      critics: [RotateToGoal, Oscillation, ObstacleFootprint, BaseObstacle, PathAlign, PathDist, GoalAlign, GoalDist, PreferForward, Twirling] # DWB 轨迹评分 critic 列表
+      ObstacleFootprint.scale: 0.35 # footprint 碰撞风险评分权重
+      BaseObstacle.scale: 0.85 # 基础障碍物代价评分权重
+      PathAlign.scale: 24.0 # 轨迹朝向全局路径的评分权重，降低后更愿意临时绕开障碍
+      PathAlign.forward_point_distance: 0.55 # 路径对齐前视点距离，单位米
+      PathDist.scale: 20.0 # 轨迹距离全局路径的评分权重，降低后不容易贴着障碍卡住
+      GoalAlign.scale: 6.0 # 轨迹朝向目标的评分权重
+      GoalAlign.forward_point_distance: 0.55 # 目标对齐前视点距离，单位米
+      GoalDist.scale: 14.0 # 轨迹距离目标的评分权重
+      PreferForward.scale: 0.05 # 偏好前进而非倒车的评分权重，降低后允许必要倒车
+      Twirling.scale: 3.0 # 抑制不必要旋转的评分权重，降低后更容易原地调整车头
+      RotateToGoal.scale: 3.0 # 接近目标时旋转到目标朝向的评分权重
+      RotateToGoal.slowing_factor: 5.0 # 接近目标旋转时减速系数
+      RotateToGoal.lookahead_time: -1.0 # RotateToGoal critic 的前视时间，-1 表示默认行为
+# 分隔：全局规划器配置
+planner_server: # Nav2 全局规划器服务器配置
+  ros__parameters: # 规划器服务器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    expected_planner_frequency: 5.0 # 期望全局规划频率，单位 Hz
+    planner_plugins: [GridBased] # 启用的全局规划器插件列表
+    GridBased: # GridBased 规划器参数块
+      plugin: nav2_smac_planner/SmacPlanner2D # 使用 SmacPlanner2D 全局规划器
+      tolerance: 0.20 # 目标容忍距离，单位米
+      downsample_costmap: false # 不降采样代价地图
+      allow_unknown: true # 允许路径经过未知区域
+      max_iterations: 1000000 # 最大搜索迭代次数
+      max_on_approach_iterations: 1000 # 接近目标时的最大迭代次数
+      max_planning_time: 2.0 # 单次规划最大耗时，单位秒
+      motion_model_for_search: MOORE # 使用 8 邻域 Moore 搜索模型
+      cost_travel_multiplier: 8.0 # 行驶代价权重，越大越避开高代价区
+      use_final_approach_orientation: false # 不强制使用最终接近方向
+# 分隔：路径平滑器配置
+smoother_server: # Nav2 路径平滑服务器配置
+  ros__parameters: # 平滑服务器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    smoother_plugins: [simple_smoother] # 启用的路径平滑插件列表
+    simple_smoother: # 简单路径平滑器参数块
+      plugin: nav2_smoother::SimpleSmoother # 简单平滑器插件类型
+      tolerance: 1.0e-10 # 平滑迭代收敛容差
+      max_its: 1000 # 平滑最大迭代次数
+      do_refinement: true # 启用平滑结果细化
+# 分隔：恢复行为服务器配置
+behavior_server: # Nav2 行为服务器配置
+  ros__parameters: # 行为服务器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    costmap_topic: local_costmap/costmap_raw # 恢复行为读取的局部原始代价地图
+    footprint_topic: local_costmap/published_footprint # 机器人 footprint 话题
+    cycle_frequency: 10.0 # 行为服务器运行频率，单位 Hz
+    behavior_plugins: [spin, backup, drive_on_heading, wait] # 启用的恢复行为插件列表
+    spin: # 原地旋转行为参数块
+      plugin: nav2_behaviors/Spin # 原地旋转行为插件
+    backup: # 后退行为参数块
+      plugin: nav2_behaviors/BackUp # 后退行为插件
+    drive_on_heading: # 按朝向直行行为参数块
+      plugin: nav2_behaviors/DriveOnHeading # 按朝向直行行为插件
+    wait: # 等待行为参数块
+      plugin: nav2_behaviors/Wait # 等待行为插件
+    global_frame: odom # 恢复行为使用的全局参考坐标系
+    robot_base_frame: base_link # 恢复行为使用的机器人本体坐标系
+    transform_tolerance: 0.2 # TF 查询容忍时间，单位秒
+    simulate_ahead_time: 2.0 # 恢复行为向前模拟时间，单位秒
+    max_rotational_vel: 0.70 # 恢复行为最大旋转速度，单位 rad/s
+    min_rotational_vel: 0.20 # 恢复行为最小旋转速度，单位 rad/s
+    rotational_acc_lim: 1.5 # 恢复行为旋转加速度限制，单位 rad/s^2
+# 分隔：局部代价地图配置
+local_costmap: # 局部代价地图命名空间
+  local_costmap: # 局部代价地图节点配置
+    ros__parameters: # 局部代价地图参数
+      use_sim_time: true # 使用 Gazebo 仿真时间
+      update_frequency: 10.0 # 局部代价地图更新频率，单位 Hz
+      publish_frequency: 5.0 # 局部代价地图发布频率，单位 Hz
+      global_frame: odom # 局部代价地图参考坐标系
+      robot_base_frame: base_link # 机器人本体坐标系
+      rolling_window: true # 启用随机器人移动的滚动窗口
+      width: 8 # 局部代价地图宽度，单位米
+      height: 8 # 局部代价地图高度，单位米
+      resolution: 0.08 # 局部代价地图分辨率，单位米/格
+      footprint: "[[-0.32, -0.25], [-0.32, 0.25], [0.32, 0.25], [0.32, -0.25]]" # 机器人矩形 footprint，单位米
+      footprint_padding: 0.01 # footprint 外扩安全边距，单位米
+      plugins: [obstacle_layer, inflation_layer] # 局部代价地图启用障碍层和膨胀层
+      obstacle_layer: # 局部障碍物层参数块
+        plugin: nav2_costmap_2d::ObstacleLayer # Nav2 障碍物层插件
+        enabled: true # 启用障碍物层
+        observation_sources: obstacle_points # 障碍物观测源名称
+        obstacle_points: # 点云障碍物观测源参数块
+          topic: /obstacle_points_2d # 障碍物点云话题
+          sensor_frame: base_link # 点云所在传感器坐标系
+          data_type: PointCloud2 # 观测数据类型为 PointCloud2
+          marking: true # 使用点云标记障碍物
+          clearing: true # 使用当前点云 raytrace 清除历史残留障碍
+          observation_persistence: 0.0 # 不保留过期点云观测，避免 phantom obstacle 残留
+          expected_update_rate: 0.5 # 超过该时间未更新则认为观测源过期
+          obstacle_min_range: 0.20 # 障碍物点最小有效距离，单位米
+          obstacle_max_range: 7.00 # 障碍物点最大有效距离，单位米
+          raytrace_min_range: 0.20 # 清除射线最小距离，单位米
+          raytrace_max_range: 7.50 # 清除射线最大距离，单位米
+          min_obstacle_height: 0.05 # 障碍物最小高度，单位米
+          max_obstacle_height: 2.00 # 障碍物最大高度，单位米
+        footprint_clearing_enabled: true # 始终清除机器人 footprint 内历史障碍
+      inflation_layer: # 局部膨胀层参数块
+        plugin: nav2_costmap_2d::InflationLayer # Nav2 代价膨胀层插件
+        cost_scaling_factor: 5.5 # 局部膨胀代价衰减系数，越大衰减越快
+        inflation_radius: 0.50 # 局部膨胀半径，单位米
+      always_send_full_costmap: true # 每次发布完整局部代价地图
+# 分隔：全局代价地图配置
+global_costmap: # 全局代价地图命名空间
+  global_costmap: # 全局代价地图节点配置
+    ros__parameters: # 全局代价地图参数
+      use_sim_time: true # 使用 Gazebo 仿真时间
+      update_frequency: 3.0 # 全局代价地图更新频率，单位 Hz
+      publish_frequency: 2.0 # 全局代价地图发布频率，单位 Hz
+      global_frame: map # 全局代价地图参考坐标系
+      robot_base_frame: base_link # 机器人本体坐标系
+      footprint: "[[-0.32, -0.25], [-0.32, 0.25], [0.32, 0.25], [0.32, -0.25]]" # 机器人矩形 footprint，单位米
+      footprint_padding: 0.01 # footprint 外扩安全边距，单位米
+      resolution: 0.08 # 全局代价地图分辨率，单位米/格
+      track_unknown_space: false # 不跟踪未知空间，未知区域按可通行处理
+      plugins: [static_layer, inflation_layer] # 全局代价地图启用静态层和膨胀层
+      static_layer: # 静态地图层参数块
+        plugin: nav2_costmap_2d::StaticLayer # Nav2 静态地图层插件
+        map_topic: /map # 静态地图输入话题
+        map_subscribe_transient_local: false # 不使用 transient local 订阅地图
+        subscribe_to_updates: false # 不订阅增量地图更新
+      inflation_layer: # 全局膨胀层参数块
+        plugin: nav2_costmap_2d::InflationLayer # Nav2 代价膨胀层插件
+        cost_scaling_factor: 5.0 # 全局膨胀代价衰减系数，越大衰减越快
+        inflation_radius: 0.65 # 全局膨胀半径，单位米
+      always_send_full_costmap: true # 每次发布完整全局代价地图
+# 分隔：路点跟随器配置
+waypoint_follower: # Nav2 路点跟随器配置
+  ros__parameters: # 路点跟随器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    loop_rate: 20 # 路点跟随器循环频率，单位 Hz
+    stop_on_failure: false # 单个路点失败时不强制停止整个任务
+    waypoint_task_executor_plugin: wait_at_waypoint # 路点任务执行插件名称
+    wait_at_waypoint: # 到达路点等待插件参数块
+      plugin: nav2_waypoint_follower::WaitAtWaypoint # 路点等待插件类型
+      enabled: false # 禁用到点等待
+      waypoint_pause_duration: 0 # 路点等待时间，单位毫秒
+# 分隔：速度平滑器配置
+velocity_smoother: # Nav2 速度平滑器配置
+  ros__parameters: # 速度平滑器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    smoothing_frequency: 10.0 # 速度平滑发布频率，单位 Hz；与 controller_frequency 保持一致
+    scale_velocities: false # 不按比例缩放速度分量
+    feedback: OPEN_LOOP # 使用开环速度平滑模式
+    max_velocity: [0.28, 0.0, 1.90] # 最大速度 [x, y, yaw]
+    min_velocity: [-0.12, 0.0, -1.90] # 最小速度 [x, y, yaw]
+    max_accel: [0.65, 0.0, 4.2] # 最大加速度 [x, y, yaw]
+    max_decel: [-0.90, 0.0, -4.5] # 最大减速度 [x, y, yaw]
+    odom_topic: /odom # 速度平滑器参考的里程计话题
+    odom_duration: 0.1 # 里程计速度估计窗口，单位秒
+    deadband_velocity: [0.0, 0.0, 0.0] # 速度死区 [x, y, yaw]
+    velocity_timeout: 1.0 # 速度命令超时时间，单位秒
+# 分隔：生命周期管理器配置
+lifecycle_manager_navigation: # Nav2 生命周期管理器配置
+  ros__parameters: # 生命周期管理器参数
+    use_sim_time: true # 使用 Gazebo 仿真时间
+    autostart: true # 启动时自动激活所有管理节点
+    node_names: # 生命周期管理器负责启动和激活的节点列表
+      - controller_server # 控制器服务器节点
+      - smoother_server # 路径平滑服务器节点
+      - planner_server # 全局规划服务器节点
+      - behavior_server # 恢复行为服务器节点
+      - bt_navigator # 行为树导航器节点
+      - waypoint_follower # 路点跟随器节点
+      - velocity_smoother # 速度平滑器节点

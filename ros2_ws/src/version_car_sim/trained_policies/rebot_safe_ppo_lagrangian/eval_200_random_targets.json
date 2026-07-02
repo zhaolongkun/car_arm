@@ -1,0 +1,14 @@
+{
+  "policy": "hybrid(torch+teacher):ros2_ws/src/version_car_sim/trained_policies/rebot_safe_ppo_lagrangian/policy.pt",
+  "episodes": 200,
+  "success_rate": 0.995,
+  "safe_success_rate": 0.995,
+  "collision_rate": 0.0,
+  "mean_final_distance": 0.03312308569533122,
+  "p95_final_distance": 0.03493367838622104,
+  "mean_episode_cost": 31.15574136961184,
+  "mean_steps": 43.865,
+  "mean_min_obstacle_distance": 0.03421780325858289,
+  "passed_98_percent": true,
+  "teacher_fallback_count": 2933
+}

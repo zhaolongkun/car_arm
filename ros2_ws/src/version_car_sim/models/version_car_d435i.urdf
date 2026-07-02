@@ -1,0 +1,159 @@
+<?xml version="1.0"?>
+<robot name="version_car_d435i">
+  <material name="body_teal">
+    <color rgba="0.08 0.38 0.43 1.0"/>
+  </material>
+  <material name="cream_panel">
+    <color rgba="0.94 0.90 0.74 1.0"/>
+  </material>
+  <material name="dark">
+    <color rgba="0.02 0.02 0.025 1.0"/>
+  </material>
+  <material name="wheel_hub">
+    <color rgba="0.80 0.80 0.75 1.0"/>
+  </material>
+  <material name="camera_lens">
+    <color rgba="0.03 0.16 0.24 1.0"/>
+  </material>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0.18" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.86 0.46 0.18"/>
+      </geometry>
+      <material name="body_teal"/>
+    </visual>
+    <visual>
+      <origin xyz="0.31 0 0.26" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.22 0.36 0.08"/>
+      </geometry>
+      <material name="cream_panel"/>
+    </visual>
+  </link>
+
+  <link name="front_left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.11" length="0.06"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.055" length="0.064"/>
+      </geometry>
+      <material name="wheel_hub"/>
+    </visual>
+  </link>
+  <joint name="front_left_wheel_fixed" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_left_wheel"/>
+    <origin xyz="0.34 0.31 0.11" rpy="0 0 1.57079632679"/>
+  </joint>
+
+  <link name="front_right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.11" length="0.06"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.055" length="0.064"/>
+      </geometry>
+      <material name="wheel_hub"/>
+    </visual>
+  </link>
+  <joint name="front_right_wheel_fixed" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_right_wheel"/>
+    <origin xyz="0.34 -0.31 0.11" rpy="0 0 1.57079632679"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.11" length="0.065"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.058" length="0.069"/>
+      </geometry>
+      <material name="wheel_hub"/>
+    </visual>
+  </link>
+  <joint name="rear_left_wheel_fixed" type="fixed">
+    <parent link="base_link"/>
+    <child link="rear_left_wheel"/>
+    <origin xyz="-0.32 0.31 0.11" rpy="0 0 1.57079632679"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.11" length="0.065"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.058" length="0.069"/>
+      </geometry>
+      <material name="wheel_hub"/>
+    </visual>
+  </link>
+  <joint name="rear_right_wheel_fixed" type="fixed">
+    <parent link="base_link"/>
+    <child link="rear_right_wheel"/>
+    <origin xyz="-0.32 -0.31 0.11" rpy="0 0 1.57079632679"/>
+  </joint>
+
+  <link name="d435i_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.135 0.038"/>
+      </geometry>
+      <material name="dark"/>
+    </visual>
+    <visual>
+      <origin xyz="0.044 0.038 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.016" length="0.008"/>
+      </geometry>
+      <material name="camera_lens"/>
+    </visual>
+    <visual>
+      <origin xyz="0.044 -0.038 0" rpy="0 1.57079632679 0"/>
+      <geometry>
+        <cylinder radius="0.016" length="0.008"/>
+      </geometry>
+      <material name="camera_lens"/>
+    </visual>
+  </link>
+  <joint name="d435i_fixed" type="fixed">
+    <parent link="base_link"/>
+    <child link="d435i_link"/>
+    <origin xyz="0.52 0 0.43" rpy="0 0 0"/>
+  </joint>
+
+  <link name="d435i_depth_optical_frame"/>
+  <joint name="d435i_depth_optical_fixed" type="fixed">
+    <parent link="d435i_link"/>
+    <child link="d435i_depth_optical_frame"/>
+    <origin xyz="0.045 0 0" rpy="-1.57079632679 0 -1.57079632679"/>
+  </joint>
+</robot>

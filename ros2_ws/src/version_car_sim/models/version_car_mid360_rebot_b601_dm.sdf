@@ -1,0 +1,992 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <model name="version_car_mid360_rebot_b601_dm">
+    <pose>0 0 0 0 0 0</pose>
+    <!-- ==================== base_link (MickX4-V3 四轮差速车体) ==================== -->
+    <link name="base_link">
+      <pose>0 0 0.16 0 0 0</pose>
+      <inertial>
+        <mass>12.0</mass>
+        <inertia>
+          <ixx>0.11</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.16</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.22</izz>
+        </inertia>
+      </inertial>
+      <collision name="base_collision">
+        <geometry>
+          <box>
+            <size>0.58 0.34 0.16</size>
+          </box>
+        </geometry>
+      </collision>
+      <visual name="base_visual">
+        <geometry>
+          <box>
+            <size>0.58 0.34 0.16</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.05 0.11 0.13 1</ambient>
+          <diffuse>0.07 0.26 0.30 1</diffuse>
+        </material>
+      </visual>
+    </link>
+    <!-- ==================== 四轮 ==================== -->
+    <link name="front_left_wheel">
+      <pose>0.20 0.20 0.10 0 0 1.57079632679</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.0025</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0038</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0025</izz>
+        </inertia>
+      </inertial>
+      <visual name="tire_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.02 0.02 1</ambient>
+          <diffuse>0.02 0.02 0.02 1</diffuse>
+        </material>
+      </visual>
+      <visual name="hub_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.050</radius>
+            <length>0.084</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.72 0.72 0.68 1</ambient>
+          <diffuse>0.80 0.80 0.75 1</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.20</mu>
+              <mu2>0.35</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.08</slip2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e+9</kp>
+              <kd>1.0</kd>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+    <link name="front_right_wheel">
+      <pose>0.20 -0.20 0.10 0 0 1.57079632679</pose>
+      <inertial>
+        <mass>0.55</mass>
+        <inertia>
+          <ixx>0.0025</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0038</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0025</izz>
+        </inertia>
+      </inertial>
+      <visual name="tire_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.02 0.02 1</ambient>
+          <diffuse>0.02 0.02 0.02 1</diffuse>
+        </material>
+      </visual>
+      <visual name="hub_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.050</radius>
+            <length>0.084</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.72 0.72 0.68 1</ambient>
+          <diffuse>0.80 0.80 0.75 1</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.20</mu>
+              <mu2>0.35</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.08</slip2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e+9</kp>
+              <kd>1.0</kd>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+    <link name="rear_left_wheel">
+      <pose>-0.20 0.20 0.10 0 0 1.57079632679</pose>
+      <inertial>
+        <mass>0.65</mass>
+        <inertia>
+          <ixx>0.0030</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0045</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0030</izz>
+        </inertia>
+      </inertial>
+      <visual name="tire_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.02 0.02 1</ambient>
+          <diffuse>0.02 0.02 0.02 1</diffuse>
+        </material>
+      </visual>
+      <visual name="hub_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.050</radius>
+            <length>0.084</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.68 0.68 0.62 1</ambient>
+          <diffuse>0.78 0.78 0.70 1</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.20</mu>
+              <mu2>0.35</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.08</slip2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e+9</kp>
+              <kd>1.0</kd>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+    <link name="rear_right_wheel">
+      <pose>-0.20 -0.20 0.10 0 0 1.57079632679</pose>
+      <inertial>
+        <mass>0.65</mass>
+        <inertia>
+          <ixx>0.0030</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.0045</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0030</izz>
+        </inertia>
+      </inertial>
+      <visual name="tire_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.02 0.02 1</ambient>
+          <diffuse>0.02 0.02 0.02 1</diffuse>
+        </material>
+      </visual>
+      <visual name="hub_visual">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.050</radius>
+            <length>0.084</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.68 0.68 0.62 1</ambient>
+          <diffuse>0.78 0.78 0.70 1</diffuse>
+        </material>
+      </visual>
+      <collision name="collision">
+        <pose>0 0 0 0 1.57079632679 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.10</radius>
+            <length>0.08</length>
+          </cylinder>
+        </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>1.20</mu>
+              <mu2>0.35</mu2>
+              <slip1>0.0</slip1>
+              <slip2>0.08</slip2>
+            </ode>
+          </friction>
+          <contact>
+            <ode>
+              <kp>1e+9</kp>
+              <kd>1.0</kd>
+              <min_depth>0.001</min_depth>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+    </link>
+    <!-- ==================== MID360 3D 激光雷达 link ==================== -->
+    <link name="mid360_link">
+      <!-- MID360 安装在 MickX4-V3 车头顶部位置 -->
+      <pose>0.24 0 0.275 0 0 0</pose>
+      <inertial>
+        <mass>0.28</mass>
+        <inertia>
+          <ixx>0.00045</ixx>
+          <ixy>0.0</ixy>
+          <ixz>0.0</ixz>
+          <iyy>0.00045</iyy>
+          <iyz>0.0</iyz>
+          <izz>0.0006</izz>
+        </inertia>
+      </inertial>
+      <!-- 雷达外观：圆柱体 -->
+      <collision name="lidar_collision">
+        <geometry>
+          <cylinder>
+            <radius>0.045</radius>
+            <length>0.07</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name="lidar_visual">
+        <geometry>
+          <cylinder>
+            <radius>0.045</radius>
+            <length>0.07</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.02 0.025 1</ambient>
+          <diffuse>0.02 0.02 0.025 1</diffuse>
+        </material>
+      </visual>
+      <visual name="lidar_window_visual">
+        <pose>0 0 0.02 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.049</radius>
+            <length>0.012</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.10 0.45 0.72 0.85</ambient>
+          <diffuse>0.12 0.55 0.88 0.85</diffuse>
+        </material>
+      </visual>
+      <!-- MID360 3D 激光雷达传感器（Ray 模式，同时输出 2D LaserScan 和 3D PointCloud2） -->
+      <sensor name="mid360_livox3d" type="ray">
+        <pose>0 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1.0</resolution>
+              <min_angle>-3.14159265</min_angle>
+              <max_angle>3.14159265</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>32</samples>
+              <resolution>1.0</resolution>
+              <min_angle>-0.43633231</min_angle>
+              <max_angle>0.43633231</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.10</min>
+            <max>18.0</max>
+            <resolution>0.02</resolution>
+          </range>
+          <noise>
+            <type>gaussian</type>
+            <mean>0.0</mean>
+            <stddev>0.015</stddev>
+          </noise>
+        </ray>
+        <!-- 3D PointCloud2 输出（用于 FAST-LIO） -->
+        <plugin name="mid360_points" filename="libgazebo_ros_ray_sensor.so">
+          <ros>
+            <remapping>~/out:=mid360_points</remapping>
+          </ros>
+          <output_type>sensor_msgs/PointCloud2</output_type>
+          <frame_name>mid360_link</frame_name>
+        </plugin>
+        <!-- 2D LaserScan 输出（可选，保留给其他用途） -->
+        <plugin name="mid360_laserscan" filename="libgazebo_ros_ray_sensor.so">
+          <ros>
+            <remapping>~/out:=scan</remapping>
+          </ros>
+          <output_type>sensor_msgs/LaserScan</output_type>
+          <frame_name>mid360_link</frame_name>
+        </plugin>
+      </sensor>
+      <!-- IMU 传感器（与 MID360 在同一 link 上，外参为 Identity） -->
+      <sensor name="mid360_imu" type="imu">
+        <pose>0 0 0 0 0 0</pose>
+        <always_on>true</always_on>
+        <visualize>false</visualize>
+        <update_rate>200</update_rate>
+        <imu>
+          <angular_velocity>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.0005</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.0005</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.0005</stddev>
+              </noise>
+            </z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </x>
+            <y>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </y>
+            <z>
+              <noise type="gaussian">
+                <mean>0.0</mean>
+                <stddev>0.01</stddev>
+              </noise>
+            </z>
+          </linear_acceleration>
+        </imu>
+        <plugin name="mid360_imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+          <ros>
+            <remapping>~/out:=imu</remapping>
+          </ros>
+          <frame_name>mid360_link</frame_name>
+        </plugin>
+      </sensor>
+    </link>
+    <!-- ==================== Detailed reBot B601-DM arm, mounted on the car ==================== -->
+    <!-- MoveIt/ros2_control use mobile_rebot_b601_dm.urdf.xacro with the same arm mount pose. -->
+    <link name="rebot_base_link">
+      <pose relative_to="base_link">0 0 0.08 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>-2.70523e-06 -7.70134e-06 0.0289808 0 -0 0</pose>
+        <mass>0.798745</mass>
+        <inertia>
+          <ixx>0.00167923</ixx>
+          <ixy>1.88775e-09</ixy>
+          <ixz>-1.97136e-08</ixz>
+          <iyy>0.00100413</iyy>
+          <iyz>2.18234e-07</iyz>
+          <izz>0.00243992</izz>
+        </inertia>
+      </inertial>
+      <visual name="rebot_base_link_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/base_link.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="base_to_rebot_base_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>rebot_base_link</child>
+    </joint>
+    <joint name="joint1" type="revolute">
+      <pose relative_to="rebot_base_link">-8.4e-05 0 0.08465 0 -0 0</pose>
+      <parent>rebot_base_link</parent>
+      <child>link1</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-2.8</lower>
+          <upper>2.8</upper>
+          <effort>27</effort>
+          <velocity>50</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.4</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link1">
+      <pose relative_to="joint1">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>1.2e-05 -0.000522 0.019772 0 -0 0</pose>
+        <mass>0.0840736</mass>
+        <inertia>
+          <ixx>8.53931e-05</ixx>
+          <ixy>5.36083e-11</ixy>
+          <ixz>8.18789e-06</ixz>
+          <iyy>5.08886e-05</iyy>
+          <iyz>1.61532e-10</iyz>
+          <izz>8.03868e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name="link1_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.02 0.20 0.07 1</ambient>
+          <diffuse>0.05 0.48 0.16 1</diffuse>
+          <specular>0.08 0.18 0.10 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="joint2" type="revolute">
+      <pose relative_to="link1">0.020084 0.031625 0.05555 -1.5708 0 0</pose>
+      <parent>link1</parent>
+      <child>link2</child>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>0</upper>
+          <effort>27</effort>
+          <velocity>50</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.4</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link2">
+      <pose relative_to="joint2">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>-0.132245 -0.00305 -0.03093 0 -0 0</pose>
+        <mass>0.710394</mass>
+        <inertia>
+          <ixx>0.000250027</ixx>
+          <ixy>1.60716e-06</ixy>
+          <ixz>2.51351e-09</ixz>
+          <iyy>0.00186322</iyy>
+          <iyz>4.36542e-07</iyz>
+          <izz>0.00186008</izz>
+        </inertia>
+      </inertial>
+      <visual name="link2_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.02 0.20 0.07 1</ambient>
+          <diffuse>0.05 0.48 0.16 1</diffuse>
+          <specular>0.08 0.18 0.10 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="joint3" type="revolute">
+      <pose relative_to="link2">-0.264 0 0 0 -0 0</pose>
+      <parent>link2</parent>
+      <child>link3</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>0</upper>
+          <effort>27</effort>
+          <velocity>50</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.4</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link3">
+      <pose relative_to="joint3">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>0.121508 -0.053757 -0.031086 0 -0 0</pose>
+        <mass>0.524942</mass>
+        <inertia>
+          <ixx>0.000160157</ixx>
+          <ixy>-1.61604e-05</ixy>
+          <ixz>-3.33083e-06</ixz>
+          <iyy>0.00124906</iyy>
+          <iyz>2.96941e-07</iyz>
+          <izz>0.00125568</izz>
+        </inertia>
+      </inertial>
+      <visual name="link3_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link3.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="joint4" type="revolute">
+      <pose relative_to="link3">0.2426 -0.054 -0.001625 0 -0 0</pose>
+      <parent>link3</parent>
+      <child>link4</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.87</lower>
+          <upper>1.57</upper>
+          <effort>7</effort>
+          <velocity>200</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link4">
+      <pose relative_to="joint4">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>0.061238 -0.051523 -0.030334 0 -0 0</pose>
+        <mass>0.191139</mass>
+        <inertia>
+          <ixx>7.18184e-05</ixx>
+          <ixy>-1.12302e-05</ixy>
+          <ixz>-5.19641e-08</ixz>
+          <iyy>0.0001129</iyy>
+          <iyz>2.21783e-07</iyz>
+          <izz>0.000101142</izz>
+        </inertia>
+      </inertial>
+      <visual name="link4_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link4.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.02 0.20 0.07 1</ambient>
+          <diffuse>0.05 0.48 0.16 1</diffuse>
+          <specular>0.08 0.18 0.10 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="joint5" type="revolute">
+      <pose relative_to="link4">0.078308 -0.0375 -0.03 -1.5708 0 0</pose>
+      <parent>link4</parent>
+      <child>link5</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-1.57</lower>
+          <upper>1.57</upper>
+          <effort>7</effort>
+          <velocity>200</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link5">
+      <pose relative_to="joint5">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>-0.005049 2e-06 0.038787 0 -0 0</pose>
+        <mass>0.150004</mass>
+        <inertia>
+          <ixx>6.79197e-05</ixx>
+          <ixy>-7.20237e-10</ixy>
+          <ixz>-2.82554e-06</ixz>
+          <iyy>5.17187e-05</iyy>
+          <iyz>9.87948e-09</iyz>
+          <izz>5.43657e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name="link5_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link5.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="joint6" type="revolute">
+      <pose relative_to="link5">0.023692 0 0.04 3.14159 1.57079 3.14159</pose>
+      <parent>link5</parent>
+      <child>link6</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-3.14</lower>
+          <upper>3.14</upper>
+          <effort>7</effort>
+          <velocity>200</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.3</damping>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name="link6">
+      <pose relative_to="joint6">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>-1e-06 5.9e-05 0.056647 0 -0 0</pose>
+        <mass>0.225527</mass>
+        <inertia>
+          <ixx>0.000637305</ixx>
+          <ixy>1.15298e-08</ixy>
+          <ixz>-1.66371e-08</ixz>
+          <iyy>0.000494549</iyy>
+          <iyz>-1.32211e-07</iyz>
+          <izz>0.000246939</izz>
+        </inertia>
+      </inertial>
+      <visual name="link6_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/link6.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.02 0.20 0.07 1</ambient>
+          <diffuse>0.05 0.48 0.16 1</diffuse>
+          <specular>0.08 0.18 0.10 1</specular>
+        </material>
+      </visual>
+      <visual name="link6_fixed_joint_lump__gripper_link_visual_1">
+        <pose>0 0 0.15971 0 -1.5708 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/gripper_link.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+      <visual name="link6_fixed_joint_lump__spray_nozzle_link_visual_2">
+        <pose>-0 0 0.17541 0 -4e-06 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.12</length>
+            <radius>0.012</radius>
+          </cylinder>
+        </geometry>
+        <material>
+          <ambient>0.02 0.35 0.08 1</ambient>
+          <diffuse>0.10 0.85 0.22 1</diffuse>
+          <specular>0.12 0.25 0.12 1</specular>
+        </material>
+      </visual>
+      <visual name="link6_fixed_joint_lump__spray_tip_link_visual_3">
+        <pose>-0 0 0.23541 0 -1.5708 0</pose>
+        <geometry>
+          <sphere>
+            <radius>0.014</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <ambient>0.02 0.45 0.10 1</ambient>
+          <diffuse>0.14 1.00 0.28 1</diffuse>
+          <specular>0.14 0.30 0.14 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="gripper_joint1" type="fixed">
+      <pose relative_to="link6">1.3e-05 2.8e-05 0.117619 1.5708 4e-06 -1.5708</pose>
+      <parent>link6</parent>
+      <child>gripper_left</child>
+    </joint>
+    <link name="gripper_left">
+      <pose relative_to="gripper_joint1">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>0.009372 -0.018351 -0.002131 0 -0 0</pose>
+        <mass>0.0423279</mass>
+        <inertia>
+          <ixx>9.68819e-06</ixx>
+          <ixy>-1.14548e-06</ixy>
+          <ixz>1.8241e-08</ixz>
+          <iyy>9.71957e-06</iyy>
+          <iyz>1.20738e-07</iyz>
+          <izz>1.13638e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name="gripper_left_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/gripper_left.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+    <joint name="gripper_joint2" type="fixed">
+      <pose relative_to="link6">-1.3e-05 -2.8e-05 0.117619 -1.5708 4e-06 1.5708</pose>
+      <parent>link6</parent>
+      <child>gripper_right</child>
+    </joint>
+    <link name="gripper_right">
+      <pose relative_to="gripper_joint2">0 0 0 0 -0 0</pose>
+      <gravity>false</gravity>
+      <inertial>
+        <pose>0.009372 0.018351 0.002131 0 -0 0</pose>
+        <mass>0.0423279</mass>
+        <inertia>
+          <ixx>9.68819e-06</ixx>
+          <ixy>1.14548e-06</ixy>
+          <ixz>-1.8241e-08</ixz>
+          <iyy>9.71957e-06</iyy>
+          <iyz>1.20738e-07</iyz>
+          <izz>1.13638e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name="gripper_right_visual">
+        <pose>0 0 0 0 -0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://rebotarm_bringup/description/meshes_b601_gripper/gripper_right.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.005 0.008 0.006 1</ambient>
+          <diffuse>0.01 0.015 0.012 1</diffuse>
+          <specular>0.08 0.10 0.08 1</specular>
+        </material>
+      </visual>
+    </link>
+
+    <!-- ==================== 关节：四轮差速，前轮不再转向 ==================== -->
+    <joint name="front_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_left_wheel</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+        <dynamics>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <joint name="front_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_right_wheel</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+        <dynamics>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <joint name="rear_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_left_wheel</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+        <dynamics>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <joint name="rear_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_right_wheel</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1.79769e+308</lower>
+          <upper>1.79769e+308</upper>
+        </limit>
+        <dynamics>
+          <friction>0.02</friction>
+        </dynamics>
+      </axis>
+    </joint>
+    <!-- MID360 固定在 base_link 上 -->
+    <joint name="mid360_fixed_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>mid360_link</child>
+    </joint>
+    <!-- ==================== 运动插件 ==================== -->
+    <!-- 四轮滑移/差速驱动：left=(vx-wz*0.40/2)/0.10, right=(vx+wz*0.40/2)/0.10 -->
+    <plugin name="skid_steer_drive" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <remapping>cmd_vel:=cmd_vel</remapping>
+        <remapping>odom:=odom</remapping>
+      </ros>
+      <update_rate>100.0</update_rate>
+      <num_wheel_pairs>2</num_wheel_pairs>
+      <left_joint>front_left_wheel_joint</left_joint>
+      <right_joint>front_right_wheel_joint</right_joint>
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <wheel_separation>0.40</wheel_separation>
+      <wheel_separation>0.40</wheel_separation>
+      <wheel_diameter>0.20</wheel_diameter>
+      <wheel_diameter>0.20</wheel_diameter>
+      <max_wheel_torque>40.0</max_wheel_torque>
+      <max_wheel_acceleration>40.0</max_wheel_acceleration>
+      <command_topic>cmd_vel</command_topic>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>false</publish_wheel_tf>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <covariance_x>0.0001</covariance_x>
+      <covariance_y>0.0001</covariance_y>
+      <covariance_yaw>0.01</covariance_yaw>
+    </plugin>
+    <plugin name="rebot_arm_joint_pose_trajectory" filename="libgazebo_ros_joint_pose_trajectory.so">
+      <ros>
+        <remapping>set_joint_trajectory:=/gazebo_arm/set_joint_trajectory</remapping>
+      </ros>
+      <update_rate>50.0</update_rate>
+    </plugin>
+  </model>
+</sdf>

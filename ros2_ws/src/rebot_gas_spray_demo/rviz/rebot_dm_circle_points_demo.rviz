@@ -1,0 +1,146 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Alpha: 0.45
+      Cell Size: 0.1
+      Class: rviz_default_plugins/Grid
+      Color: 160; 160; 164
+      Enabled: true
+      Line Style:
+        Width: 0.01
+        Value: Lines
+      Name: Grid
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+      Value: true
+
+    - Class: moveit_rviz_plugin/RobotState
+      Enabled: true
+      Name: reBot B601-DM RobotState
+      Robot Description: robot_description
+      State Display Time: 0.05 s
+      Value: true
+
+    - Class: moveit_rviz_plugin/PlanningScene
+      Enabled: true
+      Move Group Namespace: ""
+      Name: MoveIt PlanningScene
+      Planning Scene Topic: /monitored_planning_scene
+      Robot Description: robot_description
+      Value: true
+
+    - Acceleration_Scaling_Factor: 0.25
+      Class: moveit_rviz_plugin/MotionPlanning
+      Enabled: true
+      Move Group Namespace: ""
+      MoveIt_Planning_Attempts: 12
+      MoveIt_Planning_Time: 8
+      Name: MotionPlanning
+      Planning Request:
+        Planning Group: arm
+        Query Goal State: false
+        Query Start State: false
+      Planning Scene Topic: /monitored_planning_scene
+      Robot Description: robot_description
+      Velocity_Scaling_Factor: 0.25
+      Value: true
+
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Marker Scale: 0.10
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Update Interval: 0
+      Value: true
+
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Marker Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /circle_points/markers
+      Name: Circle Target Points
+      Namespaces:
+        circle_points: true
+        circle_point_labels: true
+        circle_point_path: true
+        circle_point_status: true
+      Queue Size: 100
+      Value: true
+
+    - Alpha: 1
+      Axes Length: 0.10
+      Axes Radius: 0.008
+      Class: rviz_default_plugins/Pose
+      Color: 255; 210; 30
+      Enabled: true
+      Head Length: 0.035
+      Head Radius: 0.018
+      Name: Current Target Pose
+      Shaft Length: 0.08
+      Shaft Radius: 0.006
+      Shape: Axes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /circle_points/current_target_pose
+      Value: true
+
+  Enabled: true
+  Global Options:
+    Background Color: 38; 40; 44
+    Fixed Frame: world
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+  Transformation:
+    Current:
+      Class: rviz_default_plugins/TF
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.35
+      Enable Stereo Rendering:
+        Value: false
+      Focal Point:
+        X: 0.20
+        Y: 0
+        Z: 0.18
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.58
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz_default_plugins)
+      Yaw: 5.55
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 900
+  Hide Left Dock: false
+  Hide Right Dock: false
+  Width: 1400
+  X: 100
+  Y: 50

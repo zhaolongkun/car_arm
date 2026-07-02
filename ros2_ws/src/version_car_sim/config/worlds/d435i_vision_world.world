@@ -1,0 +1,375 @@
+<?xml version="1.0"?>
+<sdf version="1.7">
+  <world name="d435i_vision_test_world">
+    <physics type="ode">
+      <max_step_size>0.002</max_step_size>
+      <real_time_update_rate>500</real_time_update_rate>
+      <real_time_factor>1</real_time_factor>
+    </physics>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <model name="vision_ground">
+      <static>true</static>
+      <pose>0 0 -0.01 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>18 14 0.02</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>18 14 0.02</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.34 0.38 0.37 1</ambient>
+            <diffuse>0.43 0.47 0.46 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="north_wall">
+      <static>true</static>
+      <pose>0 7 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>18 0.25 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>18 0.25 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.57 0.55 1</ambient>
+            <diffuse>0.62 0.64 0.61 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="south_wall">
+      <static>true</static>
+      <pose>0 -7 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>18 0.25 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>18 0.25 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.57 0.55 1</ambient>
+            <diffuse>0.62 0.64 0.61 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="east_wall">
+      <static>true</static>
+      <pose>9 0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.25 14 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.25 14 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.57 0.55 1</ambient>
+            <diffuse>0.62 0.64 0.61 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="west_wall">
+      <static>true</static>
+      <pose>-9 0 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.25 14 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.25 14 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.55 0.57 0.55 1</ambient>
+            <diffuse>0.62 0.64 0.61 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="front_box_cluster">
+      <static>true</static>
+      <pose>-0.35 -0.15 0.35 0 0 0.20</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.0 0.70 0.70</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.0 0.70 0.70</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.62 0.20 0.18 1</ambient>
+            <diffuse>0.72 0.25 0.20 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="center_round_obstacle">
+      <static>true</static>
+      <pose>0.65 0.70 0.42 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.84</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.45</radius>
+              <length>0.84</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.18 0.33 0.62 1</ambient>
+            <diffuse>0.22 0.40 0.75 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="low_front_barrier">
+      <static>true</static>
+      <pose>1.35 -1.95 0.13 0 0 -0.15</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.5 0.25 0.26</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.5 0.25 0.26</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.74 0.54 0.18 1</ambient>
+            <diffuse>0.86 0.64 0.22 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="narrow_passage_left_wall">
+      <static>true</static>
+      <pose>3.20 -2.45 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.45 1.45 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.45 1.45 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.30 0.50 0.32 1</ambient>
+            <diffuse>0.36 0.60 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="narrow_passage_right_wall">
+      <static>true</static>
+      <pose>3.20 2.25 0.45 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.45 1.55 0.9</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.45 1.55 0.9</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.30 0.50 0.32 1</ambient>
+            <diffuse>0.36 0.60 0.40 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="right_lane_cylinder">
+      <static>true</static>
+      <pose>4.35 -1.35 0.38 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.36</radius>
+              <length>0.76</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.36</radius>
+              <length>0.76</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.50 0.24 0.56 1</ambient>
+            <diffuse>0.60 0.30 0.66 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="goal_lane_box">
+      <static>true</static>
+      <pose>5.70 1.55 0.34 0 0 -0.35</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.0 0.75 0.68</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.0 0.75 0.68</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.18 0.48 0.52 1</ambient>
+            <diffuse>0.22 0.58 0.64 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="low_goal_block">
+      <static>true</static>
+      <pose>4.10 3.05 0.16 0 0 0.18</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.25 0.45 0.32</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.25 0.45 0.32</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.74 0.58 0.30 1</ambient>
+            <diffuse>0.84 0.68 0.36 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <model name="left_reference_column">
+      <static>true</static>
+      <pose>-2.70 1.25 0.33 0 0 0</pose>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <cylinder>
+              <radius>0.32</radius>
+              <length>0.66</length>
+            </cylinder>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <cylinder>
+              <radius>0.32</radius>
+              <length>0.66</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0.46 0.35 0.26 1</ambient>
+            <diffuse>0.56 0.43 0.32 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+    <scene>
+      <ambient>0.42 0.42 0.42 1</ambient>
+      <background>0.70 0.72 0.74 1</background>
+      <shadows>true</shadows>
+    </scene>
+  </world>
+</sdf>

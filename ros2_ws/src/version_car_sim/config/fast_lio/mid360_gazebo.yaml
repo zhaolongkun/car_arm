@@ -1,0 +1,61 @@
+# FAST-LIO2 参数配置 — Gazebo MID360 仿真模式
+#
+# 此配置文件适配 FAST-LIO2 ROS2 版本。
+# 话题名称已调整为与 version_car_mid360_fastlio.sdf 一致。
+#
+# 安装 FAST-LIO2 ROS2 的方法：
+#   cd ros2_ws/src
+#   git clone https://github.com/hku-mars/FAST-LIO.git -b ros2
+#   cd ros2_ws
+#   colcon build --symlink-install --packages-select fast_lio
+#
+# 注意：如果编译遇到 livox_ros_driver2 依赖问题，
+# 在 FAST-LIO2 的 CMakeLists.txt 中将 livox_ros_driver2 设为可选，
+# 或安装 livox_ros_driver2：
+#   cd ros2_ws/src
+#   git clone https://github.com/Livox-SDK/livox_ros_driver2.git
+#   colcon build --symlink-install --packages-select livox_ros_driver2
+#
+# ── 话题配置 ────────────────────────────────────────────────────────────
+# 仿真环境输出              FAST-LIO2 配置
+# /mid360_points  ────────> lid_topic
+# /imu            ────────> imu_topic
+# frame: mid360_link      > lidar_frame / imu_frame
+/**:
+    ros__parameters:
+        common:
+            lid_topic:  "/mid360_points"        # Gazebo 仿真 MID360 输出的 3D 点云。
+            imu_topic:  "/imu"                  # Gazebo 仿真 IMU 输出。
+            time_sync_en: false                 # Gazebo 仿真中激光雷达和 IMU 时间天然同步。
+            time_offset_lidar_to_imu: 0.0       # 无需时间偏移补偿。
+
+        preprocess:
+            lidar_type: 5                       # 5= 通用 PointCloud2/PointXYZI；Gazebo 点云没有 Livox line/tag 字段。
+            scan_line: 32                       # 与 version_car_mid360_fastlio.sdf 的垂直 32 线一致。
+            scan_rate: 10                       # 与 Gazebo MID360 update_rate 一致。
+            timestamp_unit: 2                   # 无逐点时间字段时仅作为默认时间单位。
+            blind: 0.5                          # 近处盲区（米），MID360 盲区约 0.3~0.5 m。
+
+        mapping:
+            acc_cov: 0.1                        # 加速度计协方差（仿真 IMU 噪声较小）。
+            gyr_cov: 0.1                        # 陀螺仪协方差。
+            b_acc_cov: 0.0001                   # 加速度计偏置随机游走协方差。
+            b_gyr_cov: 0.0001                   # 陀螺仪偏置随机游走协方差。
+            fov_degree: 360.0                   # MID360 水平视场角 360°。
+            det_range: 14.0                     # 小于 Gazebo range max，过滤最大距离空回波，让建图随车推进。
+            extrinsic_est_en: false             # Gazebo 中 IMU 和 LiDAR 在同一 link 上，外参已知。
+            extrinsic_T: [ 0.0, 0.0, 0.0 ]      # IMU-LiDAR 平移外参：零偏移（同一 link）。
+            extrinsic_R: [ 1.0, 0.0, 0.0,       # IMU-LiDAR 旋转外参：单位阵。
+                           0.0, 1.0, 0.0,
+                           0.0, 0.0, 1.0]
+
+        publish:
+            path_en: true                       # 发布路径 /path（供 RViz 可视化）。
+            map_en: true                        # 发布累计地图 /Laser_map。
+            scan_publish_en: true               # 发布当前帧点云 /cloud_registered。
+            dense_publish_en: true              # 发布稠密全局地图 /Laser_map。
+            scan_bodyframe_pub_en: true         # 发布车体系点云 /cloud_registered_body。
+
+        pcd_save:
+            pcd_save_en: false                  # 仿真模式下不保存 PCD 文件。
+            interval: -1                        # 保存间隔（-1 全部保存，仅在 pcd_save_en=true 时生效）。

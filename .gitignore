@@ -22,3 +22,6 @@ __pycache__/
 
 # Optional large/unused third-party copy; FAST_LIO_ROS2 is the package used by start scripts.
 ros2_ws/src/fast_lio/
+
+# Large chassis vendor package is not required for this ROS2/Gazebo release.
+mick_robot_chassis/

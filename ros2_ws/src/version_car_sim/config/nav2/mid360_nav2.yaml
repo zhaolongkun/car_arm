@@ -9,6 +9,7 @@ bt_navigator: # Nav2 行为树导航器主节点配置
     wait_for_service_timeout: 1000 # 等待服务可用的超时时间，单位毫秒
     default_bt_xml_filename: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml # 默认导航行为树文件，带清图/后退/旋转恢复
     default_nav_to_pose_bt_xml: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_to_pose_w_replanning_and_recovery.xml # NavigateToPose 使用的行为树文件
+    default_nav_through_poses_bt_xml: /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/navigate_through_poses_w_replanning_and_recovery.xml # 连续经过中间点并到达最终目标，中间点不触发停车
     plugin_lib_names: # 行为树可加载插件列表
       - nav2_compute_path_to_pose_action_bt_node # 计算到单个目标点路径的 BT 节点
       - nav2_compute_path_through_poses_action_bt_node # 计算经过多个目标点路径的 BT 节点
@@ -94,19 +95,19 @@ controller_server: # Nav2 控制器服务器配置
       max_vel_x: 0.24 # 最大前进速度，单位 m/s
       max_vel_y: 0.0 # 最大横向速度，差速车保持 0
       max_vel_theta: 1.90 # 最大角速度，单位 rad/s
-      min_speed_xy: 0.0 # 平面最小线速度
+      min_speed_xy: 0.08 # 高于四轮滑移模型的起步速度，避免 0.03 m/s 微速命令无法克服静摩擦
       max_speed_xy: 0.24 # 平面最大线速度
-      min_speed_theta: 0.0 # 最小角速度
+      min_speed_theta: 0.10 # 进入转向时保持有效角速度，避免微小左右修正
       acc_lim_x: 0.70 # x 方向最大加速度，单位 m/s^2
       acc_lim_y: 0.0 # y 方向最大加速度，差速车为 0
       acc_lim_theta: 4.2 # 最大角加速度，单位 rad/s^2
       decel_lim_x: -0.85 # x 方向最大减速度，单位 m/s^2
       decel_lim_y: 0.0 # y 方向最大减速度，差速车为 0
       decel_lim_theta: -4.5 # 最大角减速度，单位 rad/s^2
-      vx_samples: 32 # 前进速度采样数量，增加倒车/慢速绕行候选
+      vx_samples: 20 # 降低计算量，保留足够的前进/倒车候选
       vy_samples: 1 # 横向速度采样数量，差速车只采 1 个
-      vtheta_samples: 80 # 角速度采样数量
-      sim_time: 2.0 # 每条候选轨迹前向模拟时间，单位秒；让控制器看见更长的绕行动作
+      vtheta_samples: 40 # 降低计算量，提高局部控制更新频率
+      sim_time: 1.5 # 缩短单条轨迹前向模拟时间，提高转弯响应速度
       linear_granularity: 0.04 # 轨迹线性采样间隔，单位米
       angular_granularity: 0.025 # 轨迹角度采样间隔，单位弧度
       transform_tolerance: 0.2 # TF 查询容忍时间，单位秒
@@ -124,7 +125,7 @@ controller_server: # Nav2 控制器服务器配置
       GoalAlign.forward_point_distance: 0.55 # 目标对齐前视点距离，单位米
       GoalDist.scale: 14.0 # 轨迹距离目标的评分权重
       PreferForward.scale: 0.05 # 偏好前进而非倒车的评分权重，降低后允许必要倒车
-      Twirling.scale: 3.0 # 抑制不必要旋转的评分权重，降低后更容易原地调整车头
+      Twirling.scale: 0.5 # 降低旋转惩罚，允许差速底盘在狭窄转弯处果断调整车头
       RotateToGoal.scale: 3.0 # 接近目标时旋转到目标朝向的评分权重
       RotateToGoal.slowing_factor: 5.0 # 接近目标旋转时减速系数
       RotateToGoal.lookahead_time: -1.0 # RotateToGoal critic 的前视时间，-1 表示默认行为
@@ -206,17 +207,17 @@ local_costmap: # 局部代价地图命名空间
           clearing: true # 使用当前点云 raytrace 清除历史残留障碍
           observation_persistence: 0.0 # 不保留过期点云观测，避免 phantom obstacle 残留
           expected_update_rate: 0.5 # 超过该时间未更新则认为观测源过期
-          obstacle_min_range: 0.20 # 障碍物点最小有效距离，单位米
+          obstacle_min_range: 0.38 # 障碍物点最小有效距离，单位米；增大以避免自车点云残留
           obstacle_max_range: 7.00 # 障碍物点最大有效距离，单位米
-          raytrace_min_range: 0.20 # 清除射线最小距离，单位米
+          raytrace_min_range: 0.38 # 清除射线最小距离，单位米
           raytrace_max_range: 7.50 # 清除射线最大距离，单位米
-          min_obstacle_height: 0.05 # 障碍物最小高度，单位米
+          min_obstacle_height: 0.08 # 障碍物最小高度，单位米；抬高以避免地面杂点
           max_obstacle_height: 2.00 # 障碍物最大高度，单位米
         footprint_clearing_enabled: true # 始终清除机器人 footprint 内历史障碍
       inflation_layer: # 局部膨胀层参数块
         plugin: nav2_costmap_2d::InflationLayer # Nav2 代价膨胀层插件
-        cost_scaling_factor: 5.5 # 局部膨胀代价衰减系数，越大衰减越快
-        inflation_radius: 0.50 # 局部膨胀半径，单位米
+        cost_scaling_factor: 7.0 # 让软代价更快衰减，避免狭窄通道两侧代价过度重叠
+        inflation_radius: 0.42 # 适度缩小局部软膨胀区；真实 footprint 碰撞检查仍保留
       always_send_full_costmap: true # 每次发布完整局部代价地图
 # 分隔：全局代价地图配置
 global_costmap: # 全局代价地图命名空间

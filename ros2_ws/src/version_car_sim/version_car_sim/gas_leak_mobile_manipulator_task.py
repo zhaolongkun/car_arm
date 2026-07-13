@@ -21,7 +21,7 @@ from moveit_msgs.msg import (
     OrientationConstraint,
     PositionConstraint,
 )
-from nav2_msgs.action import NavigateToPose
+from nav2_msgs.action import NavigateThroughPoses, NavigateToPose
 from nav_msgs.msg import OccupancyGrid, Odometry
 from rclpy.action import ActionClient
 from rclpy.duration import Duration
@@ -42,6 +42,7 @@ class GasLeakMobileManipulatorTask(Node):
     def __init__(self):
         super().__init__('gas_leak_mobile_manipulator_task')
         self.declare_parameter('nav_action_name', 'navigate_to_pose')
+        self.declare_parameter('nav_through_poses_action_name', 'navigate_through_poses')
         self.declare_parameter('move_group_action_name', 'move_action')
         self.declare_parameter('arm_controller_action_name', 'rebotarm_controller/follow_joint_trajectory')
         self.declare_parameter('map_frame', 'map')
@@ -58,10 +59,15 @@ class GasLeakMobileManipulatorTask(Node):
         self.declare_parameter('nav_goal_retry_delay_sec', 1.0)
         self.declare_parameter('nav_result_retry_count', 2)
         self.declare_parameter('nav_result_retry_delay_sec', 2.0)
-        self.declare_parameter('nav_goal_timeout_sec', 180.0)
+        # A value <= 0 disables the task-level navigation timeout.
+        self.declare_parameter('nav_goal_timeout_sec', 0.0)
         self.declare_parameter('nav_goal_reached_tolerance', 0.50)
         self.declare_parameter('navigation_goal_tolerance', 0.50)
         self.declare_parameter('navigation_goal_hold_sec', 2.0)
+        self.declare_parameter('navigation_waypoint_enabled', True)
+        self.declare_parameter('navigation_waypoints', '')
+        self.declare_parameter('navigation_waypoint_x', 5.0)
+        self.declare_parameter('navigation_waypoint_y', -9.0)
         self.declare_parameter('nav_debug_log_period_sec', 3.0)
         self.declare_parameter('nav_cmd_topic', 'cmd_vel_nav')
         self.declare_parameter('final_cmd_topic', 'cmd_vel')
@@ -185,6 +191,10 @@ class GasLeakMobileManipulatorTask(Node):
 
         self.nav_client = ActionClient(
             self, NavigateToPose, str(self.get_parameter('nav_action_name').value))
+        self.nav_through_poses_client = ActionClient(
+            self,
+            NavigateThroughPoses,
+            str(self.get_parameter('nav_through_poses_action_name').value))
         self.move_group_client = ActionClient(
             self, MoveGroup, str(self.get_parameter('move_group_action_name').value))
         self.trajectory_client = ActionClient(
@@ -304,23 +314,50 @@ class GasLeakMobileManipulatorTask(Node):
             self.get_logger().error('一直没有收到 leak_pose_map，任务停止。')
             return
 
+        try:
+            waypoint_coordinates = self.configured_navigation_waypoints()
+        except ValueError as exc:
+            self.get_logger().error(f'中间点列表配置错误: {exc}，任务停止。')
+            return
+        waypoint_enabled = (
+            self.parameter_as_bool('navigation_waypoint_enabled')
+            and bool(waypoint_coordinates)
+        )
+
         self.set_task_state('WAIT_NAVIGATION')
-        if not self.wait_for_navigation_ready():
+        if not self.wait_for_navigation_ready(use_through_poses=waypoint_enabled):
             self.get_logger().error('导航系统没有准备好，任务停止。')
             return
 
         nav_ok = False
-        work_pose = None
+        work_pose = self.compute_work_pose(leak_pose)
         nav_attempts = max(1, int(self.get_parameter('nav_result_retry_count').value))
         nav_retry_delay = max(
             0.0, float(self.get_parameter('nav_result_retry_delay_sec').value))
         for attempt in range(1, nav_attempts + 1):
-            work_pose = self.compute_work_pose(leak_pose)
             self.set_task_state('NAVIGATING')
             self.get_logger().info(
                 f'导航到泄漏源作业位姿({attempt}/{nav_attempts}): '
                 f'x={work_pose.pose.position.x:.2f}, y={work_pose.pose.position.y:.2f}')
-            nav_ok = self.send_nav_goal(work_pose)
+            if waypoint_enabled and attempt == 1:
+                waypoint_poses = self.compute_navigation_waypoint_poses(
+                    waypoint_coordinates,
+                    work_pose)
+                waypoint_text = ' -> '.join(
+                    f'({pose.pose.position.x:.2f}, {pose.pose.position.y:.2f})'
+                    for pose in waypoint_poses)
+                self.get_logger().info(
+                    f'使用连续多位姿导航，{len(waypoint_poses)} 个中间点: '
+                    f'起点 -> {waypoint_text} -> '
+                    f'作业目标({work_pose.pose.position.x:.2f}, '
+                    f'{work_pose.pose.position.y:.2f})；所有中间点均不停车。')
+                nav_ok = self.send_nav_route(waypoint_poses + [work_pose], work_pose)
+            else:
+                if waypoint_enabled:
+                    self.get_logger().warn(
+                        '连续路线首次执行未成功；重试时只发送最终作业点，'
+                        '不再返回已经过的中间点。')
+                nav_ok = self.send_nav_goal(work_pose)
             if not nav_ok and self.is_robot_near_goal(work_pose):
                 nav_ok = True
                 self.get_logger().warn(
@@ -328,7 +365,7 @@ class GasLeakMobileManipulatorTask(Node):
             if nav_ok or self.shutdown_event.is_set():
                 break
             if attempt < nav_attempts:
-                self.get_logger().warn('Nav2 本次未到达，重新计算作业位姿后再试一次。')
+                self.get_logger().warn('Nav2 本次未到达，保持原最终作业位姿再试一次。')
                 self.sleep_for(nav_retry_delay)
         if self.shutdown_event.is_set():
             return
@@ -553,7 +590,7 @@ class GasLeakMobileManipulatorTask(Node):
             self.sleep_for(0.1)
         return None
 
-    def wait_for_navigation_ready(self):
+    def wait_for_navigation_ready(self, use_through_poses=False):
         timeout = float(self.get_parameter('nav_ready_timeout_sec').value)
         settle_sec = max(0.0, float(self.get_parameter('nav_ready_settle_sec').value))
         start = time.monotonic()
@@ -567,7 +604,16 @@ class GasLeakMobileManipulatorTask(Node):
             map_ready = self.latest_map_time is not None
             odom_ready = self.latest_odom_time is not None
             tf_ready = self.lookup_base_xy() is not None
-            nav_ready = self.nav_client.wait_for_server(timeout_sec=0.1)
+            nav_ready = (
+                self.nav_through_poses_client.wait_for_server(timeout_sec=0.1)
+                if use_through_poses
+                else self.nav_client.wait_for_server(timeout_sec=0.1)
+            )
+            nav_action = (
+                self.get_parameter('nav_through_poses_action_name').value
+                if use_through_poses
+                else self.get_parameter('nav_action_name').value
+            )
 
             if map_ready and odom_ready and tf_ready and nav_ready:
                 if settle_sec > 0.0:
@@ -582,7 +628,7 @@ class GasLeakMobileManipulatorTask(Node):
                     '等待导航准备: '
                     f'map={map_ready}, odom={odom_ready}, '
                     f'tf(map->{self.get_parameter("base_frame").value})={tf_ready}, '
-                    f'nav2_action={nav_ready}')
+                    f'nav2_action=/{nav_action}, ready={nav_ready}')
                 next_log = now + 2.0
             self.sleep_for(0.1)
 
@@ -620,6 +666,61 @@ class GasLeakMobileManipulatorTask(Node):
         goal.pose.orientation.z = math.sin(yaw * 0.5)
         goal.pose.orientation.w = math.cos(yaw * 0.5)
         return goal
+
+    def configured_navigation_waypoints(self):
+        raw = str(self.get_parameter('navigation_waypoints').value).strip()
+        if not raw:
+            return [(
+                float(self.get_parameter('navigation_waypoint_x').value),
+                float(self.get_parameter('navigation_waypoint_y').value),
+            )]
+        return self.parse_navigation_waypoints(raw)
+
+    @staticmethod
+    def parse_navigation_waypoints(raw):
+        raw = str(raw).strip()
+        if raw in ('', '[]'):
+            return []
+
+        coordinates = []
+        for index, chunk in enumerate(raw.split(';'), start=1):
+            chunk = chunk.strip()
+            if not chunk:
+                raise ValueError(f'第 {index} 个中间点为空')
+            parts = [part.strip() for part in chunk.split(',')]
+            if len(parts) != 2:
+                raise ValueError(
+                    f'第 {index} 个中间点 "{chunk}" 格式错误，应为 x,y')
+            try:
+                x = float(parts[0])
+                y = float(parts[1])
+            except ValueError as exc:
+                raise ValueError(
+                    f'第 {index} 个中间点 "{chunk}" 坐标不是数字') from exc
+            if not (math.isfinite(x) and math.isfinite(y)):
+                raise ValueError(f'第 {index} 个中间点坐标必须是有限数值')
+            coordinates.append((x, y))
+        return coordinates
+
+    def compute_navigation_waypoint_poses(self, coordinates, final_pose):
+        final_xy = (
+            float(final_pose.pose.position.x),
+            float(final_pose.pose.position.y))
+        route_coordinates = list(coordinates) + [final_xy]
+        poses = []
+        for index, (waypoint_x, waypoint_y) in enumerate(coordinates):
+            next_x, next_y = route_coordinates[index + 1]
+            yaw = math.atan2(next_y - waypoint_y, next_x - waypoint_x)
+
+            waypoint = PoseStamped()
+            waypoint.header.frame_id = str(self.get_parameter('map_frame').value)
+            waypoint.header.stamp = self.get_clock().now().to_msg()
+            waypoint.pose.position.x = waypoint_x
+            waypoint.pose.position.y = waypoint_y
+            waypoint.pose.orientation.z = math.sin(yaw * 0.5)
+            waypoint.pose.orientation.w = math.cos(yaw * 0.5)
+            poses.append(waypoint)
+        return poses
 
     def lookup_base_xy(self):
         try:
@@ -695,7 +796,7 @@ class GasLeakMobileManipulatorTask(Node):
         distance_reached_since = None
         while rclpy.ok() and not self.shutdown_event.is_set() and not result_future.done():
             now = time.monotonic()
-            if now - start > timeout:
+            if timeout > 0.0 and now - start > timeout:
                 self.log_nav_execution_snapshot('Nav2 导航等待超时前诊断', pose)
                 self.log_navigation_reach_status(
                     'Nav2 timeout reach status',
@@ -703,6 +804,8 @@ class GasLeakMobileManipulatorTask(Node):
                     reached_by_action=False,
                     reached_by_distance=False)
                 self.get_logger().error('Nav2 导航等待超时。')
+                cancel_future = handle.cancel_goal_async()
+                self.wait_future(cancel_future, 2.0)
                 return False
             distance_info = self.navigation_goal_distance_info(pose)
             distance_reached = False
@@ -751,6 +854,126 @@ class GasLeakMobileManipulatorTask(Node):
         self.log_navigation_reach_status(
             'Nav2 final reach status',
             pose,
+            reached_by_action=reached_by_action,
+            reached_by_distance=reached_by_distance)
+        return reached_by_action
+
+    def send_nav_route(self, poses, final_pose):
+        if not poses:
+            self.get_logger().error('NavigateThroughPoses 路线为空。')
+            return False
+        if not self.nav_through_poses_client.wait_for_server(timeout_sec=25.0):
+            self.get_logger().error('找不到 Nav2 navigate_through_poses action server。')
+            return False
+
+        retry_count = max(1, int(self.get_parameter('nav_goal_retry_count').value))
+        retry_delay = max(0.0, float(self.get_parameter('nav_goal_retry_delay_sec').value))
+
+        handle = None
+        for attempt in range(1, retry_count + 1):
+            stamp = self.get_clock().now().to_msg()
+            for pose in poses:
+                pose.header.stamp = stamp
+            goal = NavigateThroughPoses.Goal()
+            goal.poses = poses
+            self.latest_nav_feedback = None
+            self.log_nav_execution_snapshot(
+                f'准备发送 Nav2 连续路线 {attempt}/{retry_count}', final_pose)
+            send_future = self.nav_through_poses_client.send_goal_async(
+                goal,
+                feedback_callback=self.on_nav_feedback)
+            if not self.wait_future(send_future, 10.0):
+                self.get_logger().warn(
+                    f'发送 Nav2 连续路线超时，第 {attempt}/{retry_count} 次。')
+            else:
+                handle = send_future.result()
+                if handle.accepted:
+                    route_text = ' -> '.join(
+                        f'({pose.pose.position.x:.3f}, {pose.pose.position.y:.3f})'
+                        for pose in poses)
+                    self.get_logger().info(
+                        f'Nav2 NavigateThroughPoses accepted: {route_text}, '
+                        f'attempt={attempt}/{retry_count}')
+                    self.log_nav_execution_snapshot('Nav2 连续路线 accepted', final_pose)
+                    break
+                self.get_logger().warn(
+                    f'Nav2 拒绝了连续路线，第 {attempt}/{retry_count} 次。')
+
+            handle = None
+            if attempt < retry_count:
+                self.sleep_for(retry_delay)
+
+        if handle is None or not handle.accepted:
+            self.get_logger().error('Nav2 多次拒绝连续路线。')
+            return False
+
+        result_future = handle.get_result_async()
+        timeout = float(self.get_parameter('nav_goal_timeout_sec').value)
+        hold_sec = max(0.0, float(self.get_parameter('navigation_goal_hold_sec').value))
+        start = time.monotonic()
+        next_debug = start
+        distance_reached_since = None
+        while rclpy.ok() and not self.shutdown_event.is_set() and not result_future.done():
+            now = time.monotonic()
+            if timeout > 0.0 and now - start > timeout:
+                self.log_nav_execution_snapshot('Nav2 连续路线等待超时前诊断', final_pose)
+                self.log_navigation_reach_status(
+                    'Nav2 route timeout reach status',
+                    final_pose,
+                    reached_by_action=False,
+                    reached_by_distance=False)
+                self.get_logger().error('Nav2 连续路线等待超时。')
+                cancel_future = handle.cancel_goal_async()
+                self.wait_future(cancel_future, 2.0)
+                return False
+            distance_info = self.navigation_goal_distance_info(final_pose)
+            distance_reached = False
+            if distance_info is not None:
+                _, distance, tolerance, _ = distance_info
+                distance_reached = distance <= tolerance
+                if distance_reached:
+                    if distance_reached_since is None:
+                        distance_reached_since = now
+                    elif now - distance_reached_since >= hold_sec:
+                        self.log_navigation_reach_status(
+                            'Nav2 route distance fallback reached',
+                            final_pose,
+                            reached_by_action=False,
+                            reached_by_distance=True)
+                        self.get_logger().warn(
+                            f'Nav2 连续路线结果尚未返回，但距离最终目标小于阈值已持续 '
+                            f'{hold_sec:.2f}s，取消导航并继续任务。')
+                        cancel_future = handle.cancel_goal_async()
+                        self.wait_future(cancel_future, 1.0)
+                        return True
+                else:
+                    distance_reached_since = None
+            if now >= next_debug:
+                self.log_nav_execution_snapshot('Nav2 连续路线正在执行', final_pose)
+                self.log_navigation_reach_status(
+                    'Nav2 route reach check',
+                    final_pose,
+                    reached_by_action=False,
+                    reached_by_distance=distance_reached)
+                next_debug = now + max(
+                    0.5, float(self.get_parameter('nav_debug_log_period_sec').value))
+            self.sleep_for(0.05)
+        if self.shutdown_event.is_set():
+            return False
+
+        result = result_future.result()
+        status_name = self.goal_status_name(result.status)
+        self.get_logger().info(
+            f'Nav2 NavigateThroughPoses result: {status_name} ({result.status})')
+        self.log_nav_execution_snapshot(f'Nav2 route result {status_name}', final_pose)
+        reached_by_action = result.status == GoalStatus.STATUS_SUCCEEDED
+        distance_info = self.navigation_goal_distance_info(final_pose)
+        reached_by_distance = (
+            False if distance_info is None
+            else distance_info[1] <= distance_info[2])
+        self.log_navigation_reach_status(
+            'Nav2 route final reach status',
+            final_pose,
             reached_by_action=reached_by_action,
             reached_by_distance=reached_by_distance)
         return reached_by_action

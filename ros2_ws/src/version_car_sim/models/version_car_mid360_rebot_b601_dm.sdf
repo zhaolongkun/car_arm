@@ -86,10 +86,12 @@
         <surface>
           <friction>
             <ode>
-              <mu>1.20</mu>
-              <mu2>0.35</mu2>
-              <slip1>0.0</slip1>
-              <slip2>0.08</slip2>
+              <!-- fdir1 is the wheel axle / lateral-slip direction. -->
+              <fdir1>0 0 1</fdir1>
+              <mu>0.35</mu>
+              <mu2>1.20</mu2>
+              <slip1>0.04</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
           <contact>
@@ -152,10 +154,12 @@
         <surface>
           <friction>
             <ode>
-              <mu>1.20</mu>
-              <mu2>0.35</mu2>
-              <slip1>0.0</slip1>
-              <slip2>0.08</slip2>
+              <!-- fdir1 is the wheel axle / lateral-slip direction. -->
+              <fdir1>0 0 1</fdir1>
+              <mu>0.35</mu>
+              <mu2>1.20</mu2>
+              <slip1>0.04</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
           <contact>
@@ -218,10 +222,12 @@
         <surface>
           <friction>
             <ode>
-              <mu>1.20</mu>
-              <mu2>0.35</mu2>
-              <slip1>0.0</slip1>
-              <slip2>0.08</slip2>
+              <!-- fdir1 is the wheel axle / lateral-slip direction. -->
+              <fdir1>0 0 1</fdir1>
+              <mu>0.35</mu>
+              <mu2>1.20</mu2>
+              <slip1>0.04</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
           <contact>
@@ -284,10 +290,12 @@
         <surface>
           <friction>
             <ode>
-              <mu>1.20</mu>
-              <mu2>0.35</mu2>
-              <slip1>0.0</slip1>
-              <slip2>0.08</slip2>
+              <!-- fdir1 is the wheel axle / lateral-slip direction. -->
+              <fdir1>0 0 1</fdir1>
+              <mu>0.35</mu>
+              <mu2>1.20</mu2>
+              <slip1>0.04</slip1>
+              <slip2>0.0</slip2>
             </ode>
           </friction>
           <contact>

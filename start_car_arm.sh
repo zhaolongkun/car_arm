@@ -65,6 +65,29 @@ HOME_TO_INITIAL_DURATION="${HOME_TO_INITIAL_DURATION:-2.0}"
 INITIAL_TO_TARGET_DURATION="${INITIAL_TO_TARGET_DURATION:-3.0}"
 NAVIGATION_GOAL_TOLERANCE="${NAVIGATION_GOAL_TOLERANCE:-0.50}"
 NAVIGATION_GOAL_HOLD_SEC="${NAVIGATION_GOAL_HOLD_SEC:-2.0}"
+# 0 表示不设置任务层导航超时上限，由 Nav2 自身判断成功或失败。
+NAV_GOAL_TIMEOUT_SEC="${NAV_GOAL_TIMEOUT_SEC:-0.0}"
+NAVIGATION_WAYPOINT_ENABLED="${NAVIGATION_WAYPOINT_ENABLED:-true}"
+# 在这个数组中按行驶顺序添加中间点，每行格式为 "x,y"。
+# 脚本会自动将数组拼成 x1,y1;x2,y2;... 并传给 Nav2。
+NAVIGATION_WAYPOINTS_DEFAULT=(
+  "-7.0,-8.0"
+  "0.0,-7.0"
+  "5.0,-9.0"
+  "5.0,-2.0"
+  "1.0,-2.0"
+  "-8.0,-1.0"
+  "-8.0,4.0"
+)
+# 保留旧的单点参数，用于兼容直接启动 launch 文件的方式。
+NAVIGATION_WAYPOINT_X="${NAVIGATION_WAYPOINT_X:-5.0}"
+NAVIGATION_WAYPOINT_Y="${NAVIGATION_WAYPOINT_Y:--9.0}"
+if [[ -z "${NAVIGATION_WAYPOINTS:-}" ]]; then
+  OLD_IFS="${IFS}"
+  IFS=';'
+  NAVIGATION_WAYPOINTS="${NAVIGATION_WAYPOINTS_DEFAULT[*]}"
+  IFS="${OLD_IFS}"
+fi
 SIMULATION_FAST_MODE="${SIMULATION_FAST_MODE:-true}"
 REAL_HARDWARE_MODE="${REAL_HARDWARE_MODE:-false}"
 ARM_MAX_VELOCITY_SCALING_FACTOR="${ARM_MAX_VELOCITY_SCALING_FACTOR:-1.0}"
@@ -213,6 +236,9 @@ export GAZEBO_MODEL_PATH="${WS_DIR}/install/rebotarm_bringup/share:${GAZEBO_MODE
 echo "启动 小车底盘 + MID360 + FAST-LIO + Nav2 + reBot B601-DM 机械臂 联合仿真..."
 echo "泄漏点: map(${LEAK_X}, ${LEAK_Y}, ${LEAK_Z})，小车外壳到泄漏点净距离: ${WORK_DISTANCE} m"
 echo "小车安全半径: ${VEHICLE_SAFETY_RADIUS} m，实际 base_link 中心停车距离 = 半径 + 净距离"
+if [[ "${NAVIGATION_WAYPOINT_ENABLED}" == "true" ]]; then
+  echo "连续导航路线: 起点 -> ${NAVIGATION_WAYPOINTS} -> 作业目标；所有中间点不停车"
+fi
 echo "机械臂控制模式: ${ARM_CONTROL_MODE}"
 echo "安全强化学习策略: ${RL_POLICY_PATH}"
 echo "喷头安全高度: 地面以上 >= ${MIN_SPRAY_TIP_Z} m，喷洒前距 ${SPRAY_STANDOFF} m"
@@ -253,6 +279,11 @@ ros2 launch version_car_sim gas_leak_car_arm_demo.launch.py \
   "initial_to_target_duration:=${INITIAL_TO_TARGET_DURATION}" \
   "navigation_goal_tolerance:=${NAVIGATION_GOAL_TOLERANCE}" \
   "navigation_goal_hold_sec:=${NAVIGATION_GOAL_HOLD_SEC}" \
+  "nav_goal_timeout_sec:=${NAV_GOAL_TIMEOUT_SEC}" \
+  "navigation_waypoint_enabled:=${NAVIGATION_WAYPOINT_ENABLED}" \
+  "navigation_waypoints:=${NAVIGATION_WAYPOINTS}" \
+  "navigation_waypoint_x:=${NAVIGATION_WAYPOINT_X}" \
+  "navigation_waypoint_y:=${NAVIGATION_WAYPOINT_Y}" \
   "simulation_fast_mode:=${SIMULATION_FAST_MODE}" \
   "real_hardware_mode:=${REAL_HARDWARE_MODE}" \
   "arm_max_velocity_scaling_factor:=${ARM_MAX_VELOCITY_SCALING_FACTOR}" \

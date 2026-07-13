@@ -272,6 +272,14 @@ def launch_setup(context, *args, **kwargs):
                     LaunchConfiguration('navigation_goal_tolerance'), value_type=float),
                 'navigation_goal_hold_sec': ParameterValue(
                     LaunchConfiguration('navigation_goal_hold_sec'), value_type=float),
+                'navigation_waypoint_enabled': ParameterValue(
+                    LaunchConfiguration('navigation_waypoint_enabled'), value_type=bool),
+                'navigation_waypoints': ParameterValue(
+                    LaunchConfiguration('navigation_waypoints'), value_type=str),
+                'navigation_waypoint_x': ParameterValue(
+                    LaunchConfiguration('navigation_waypoint_x'), value_type=float),
+                'navigation_waypoint_y': ParameterValue(
+                    LaunchConfiguration('navigation_waypoint_y'), value_type=float),
                 'nav_debug_log_period_sec': 3.0,
                 'nav_cmd_topic': 'cmd_vel_nav',
                 'final_cmd_topic': 'cmd_vel',
@@ -378,9 +386,13 @@ def generate_launch_description():
         DeclareLaunchArgument('enable_gazebo_arm_mirror', default_value='true'),
         DeclareLaunchArgument('gazebo_arm_mirror_duration_sec', default_value='3.0'),
         DeclareLaunchArgument('nav_ready_timeout_sec', default_value='45.0'),
-        DeclareLaunchArgument('nav_goal_timeout_sec', default_value='180.0'),
+        DeclareLaunchArgument('nav_goal_timeout_sec', default_value='0.0'),
         DeclareLaunchArgument('navigation_goal_tolerance', default_value='0.50'),
         DeclareLaunchArgument('navigation_goal_hold_sec', default_value='2.0'),
+        DeclareLaunchArgument('navigation_waypoint_enabled', default_value='true'),
+        DeclareLaunchArgument('navigation_waypoints', default_value=''),
+        DeclareLaunchArgument('navigation_waypoint_x', default_value='5.0'),
+        DeclareLaunchArgument('navigation_waypoint_y', default_value='-9.0'),
         DeclareLaunchArgument('start_task', default_value='true'),
         DeclareLaunchArgument('arm_control_mode', default_value='moveit'),
         DeclareLaunchArgument('rl_policy_path', default_value=''),

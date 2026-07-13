@@ -1,39 +1,42 @@
-# Car Arm 仿真项目
+# Car Arm 小车机械臂联合仿真项目
 
-本项目是一个基于 ROS2 Humble + Gazebo Classic 的“小车 + MID360 雷达 + reBot B601-DM 机械臂”联合仿真工程。
+本项目基于 Ubuntu 22.04、ROS2 Humble 和 Gazebo Classic，搭建“小车底盘 + MID360 雷达 + FAST-LIO/Nav2 + reBot B601-DM 机械臂”的联合仿真环境。
 
-当前目标是让小车在仿真环境中完成建图、导航和避障，到达泄漏源附近后停止，再由车载机械臂控制喷头运动到泄漏点上方附近进行喷洒，同时避免机械臂与小车车体、雷达、车轮、地面和自身发生碰撞。
+项目目标是让小车在 Gazebo 场景中完成建图、导航、局部避障和定点停车，并在靠近泄漏源后由车载机械臂控制喷头到达安全喷洒位置，完成泄漏点喷洒任务。
 
 ## 主要功能
 
-- Gazebo 中显示小车、障碍物、MID360 雷达和 reBot B601-DM 机械臂。
-- RViz 中显示地图、路径、点云、TF、局部/全局代价地图和机器人状态。
-- 支持 FAST-LIO 仿真模式，默认使用 `stub` 模式，便于没有真实雷达时运行。
-- 支持 Nav2 导航，小车从起点导航到泄漏源附近。
-- 支持安全强化学习控制机械臂，默认使用已训练策略。
-- 支持重新训练车载机械臂安全避碰策略。
-- 使用相对路径组织工程，方便克隆后迁移和开源。
+- 小车、MID360 雷达、reBot B601-DM 机械臂一体化 Gazebo 仿真。
+- RViz 可视化地图、点云、TF、Nav2 路径、代价地图、机器人状态和机械臂状态。
+- 支持 FAST-LIO stub 仿真模式，默认不依赖真实 Livox 驱动即可运行。
+- 支持切换真实 FAST-LIO / Livox 工作区。
+- 支持 Nav2 导航和多中间点连续导航。
+- 支持泄漏源目标点配置、小车停车距离配置和喷头安全高度约束。
+- 支持安全强化学习策略控制机械臂喷洒动作。
+- 支持重新训练整车 Gazebo 场景中的机械臂安全策略。
+- 提供一键启动、停止和训练脚本。
 
 ## 项目结构
 
 ```text
 .
-├── start_car_arm.sh              # 启动小车 + 雷达 + 机械臂 + Nav2 + RL 控制
-├── stop_car_arm.sh               # 关闭仿真和相关 ROS2/Gazebo 进程
+├── readme.txt                    # 项目说明文档
+├── start_car_arm.sh              # 启动小车 + 雷达 + Nav2 + 机械臂联合仿真
+├── stop_car_arm.sh               # 清理 Gazebo、RViz、ROS2 launch 和任务节点
+├── start_car.sh                  # 仅启动小车 + MID360 + FAST-LIO/Nav2 仿真
+├── start_arm.sh                  # 仅启动 reBot B601-DM 机械臂仿真
 ├── train_car_arm_safe_rl.sh      # 训练车载机械臂安全强化学习策略
-├── start_car.sh                  # 仅启动小车相关仿真
-├── start_arm.sh                  # 仅机械臂相关启动脚本
 ├── ros2_ws/                      # ROS2 工作区
 │   └── src/
-│       ├── version_car_sim/      # 小车、Gazebo、Nav2、RL、任务流程代码
+│       ├── version_car_sim/      # 小车、Gazebo、Nav2、任务流程、RL 控制代码
 │       ├── FAST_LIO_ROS2/        # FAST-LIO ROS2 包
-│       └── _external_rebot/      # reBot 机械臂相关外部代码
-└── readme.txt                    # 项目说明
+│       └── _external_rebot/      # reBot 机械臂外部依赖代码
+└── 说明/                         # 补充说明文档
 ```
 
 ## 环境要求
 
-推荐系统：
+推荐环境：
 
 ```text
 Ubuntu 22.04
@@ -42,26 +45,27 @@ Gazebo Classic
 Python 3
 ```
 
-需要安装常用 ROS2 依赖：
+常用依赖安装：
 
 ```bash
 sudo apt update
 sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup
 sudo apt install ros-humble-gazebo-ros-pkgs ros-humble-ros2-control ros-humble-ros2-controllers
 sudo apt install ros-humble-xacro ros-humble-robot-state-publisher ros-humble-joint-state-publisher
+sudo apt install ros-humble-moveit
 sudo apt install python3-colcon-common-extensions python3-pip
 ```
 
-默认启动使用 `FAST_LIO_MODE=stub`，只做 Gazebo 仿真演示时不需要 `livox_ros_driver2`。
+默认 `FAST_LIO_MODE=stub`，只运行 Gazebo 仿真演示时不需要真实 Livox 驱动。
 
-如果使用真实 FAST-LIO / Livox 驱动，需要准备 `livox_ros_driver2` 工作区。启动脚本会自动查找：
+如需真实 FAST-LIO / Livox 驱动，请准备 `livox_ros_driver2` 工作区。脚本会自动查找：
 
 ```text
 ./third_party/ws_livox
 ../livox/ws_livox
 ```
 
-也可以手动指定，并切换到真实 FAST-LIO：
+也可以手动指定：
 
 ```bash
 FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
@@ -72,7 +76,7 @@ FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
 进入项目根目录：
 
 ```bash
-cd car_arm
+cd /home/kun/car_arm
 ```
 
 编译 ROS2 工作区：
@@ -84,112 +88,200 @@ colcon build --symlink-install
 source install/setup.bash
 ```
 
-如果提示找不到 `livox_ros_driver2`，先 source 你的 Livox 工作区：
+如果只想使用一键脚本，通常可以直接运行启动脚本。脚本会自动构建需要的包：
 
 ```bash
-source /path/to/ws_livox/install/setup.bash
-colcon build --symlink-install
+cd /home/kun/car_arm
+./start_car_arm.sh
 ```
 
-## 一键启动完整仿真
-
-回到项目根目录：
+跳过自动构建：
 
 ```bash
-cd ..
+SKIP_BUILD=true ./start_car_arm.sh
+```
+
+## 一键启动完整联合仿真
+
+```bash
+cd /home/kun/car_arm
 ./start_car_arm.sh
 ```
 
 默认会启动：
 
-- Gazebo；
+- Gazebo 图形界面；
 - RViz；
 - 小车模型；
 - MID360 雷达模型；
-- reBot B601-DM 机械臂模型；
 - FAST-LIO stub；
-- Nav2；
+- Nav2 导航；
+- reBot B601-DM 机械臂；
 - 泄漏源任务节点；
+- 喷洒仿真节点；
 - 安全强化学习机械臂控制器。
 
-默认泄漏源目标点为：
+默认泄漏源位置：
 
 ```text
 map: x=10.0, y=10.0, z=0.3
 ```
 
-可以通过环境变量修改：
+修改泄漏源位置：
 
 ```bash
-LEAK_X=10.0 LEAK_Y=10.0 LEAK_Z=0.3 ./start_car_arm.sh
+LEAK_X=8.0 LEAK_Y=6.0 LEAK_Z=0.3 ./start_car_arm.sh
 ```
 
-## 停止仿真
+无 GUI / 无 RViz 启动：
+
+```bash
+GUI=false RVIZ=false ./start_car_arm.sh
+```
+
+启动前如果有旧进程，脚本默认会自动调用 `stop_car_arm.sh` 清理。也可以手动清理：
 
 ```bash
 ./stop_car_arm.sh
 ```
 
-如果旧进程没有关干净，先执行这个脚本再重新启动。
+## 任务流程
 
-## 小车与机械臂任务流程
-
-完整流程如下：
+完整联合任务流程：
 
 ```text
 启动仿真
-  -> 小车生成在起点
-  -> Nav2 规划到泄漏源附近
-  -> 小车到达目标附近并停止
-  -> 任务节点触发机械臂
-  -> 机械臂从 home 全 0 姿态开始
-  -> 机械臂运动到 initial_pose
-  -> 安全强化学习策略控制机械臂靠近喷洒目标
-  -> 喷头停在泄漏点上方附近
+  -> 小车在起点生成
+  -> MID360 / FAST-LIO stub 输出点云和里程计相关话题
+  -> Nav2 根据泄漏源位置规划路线
+  -> 小车按中间点连续导航到作业点附近
+  -> 小车在泄漏源安全距离外停车
+  -> 机械臂从 home 姿态运动到初始工作姿态
+  -> 安全强化学习策略控制 spray_tip_link 接近喷洒位姿
+  -> 喷头保持安全高度和喷洒距离
   -> 发布喷洒动作
 ```
 
-当前默认机械臂控制模式是：
+默认机械臂控制模式：
 
 ```text
 ARM_CONTROL_MODE=rl
 ```
 
-也就是使用安全强化学习策略控制机械臂。
-
-## 安全强化学习策略
-
-机械臂控制使用 Safe PPO / PPO-Lagrangian 思路搭建安全强化学习框架。
-
-训练目标：
-
-- 让 `spray_tip_link` 靠近泄漏源附近的安全喷洒位姿；
-- 避免机械臂碰撞小车车体、雷达、车轮、地面和自身；
-- 使用 reward 鼓励到达目标；
-- 使用 safety cost 约束碰撞风险；
-- 使用 safety shield 在执行动作前做安全检查。
-
-默认策略文件路径：
+默认会优先加载 Gazebo 训练策略：
 
 ```text
 ros2_ws/src/version_car_sim/trained_policies/rebot_safe_ppo_lagrangian_gazebo/policy.pt
 ```
 
-如果想手动指定策略：
+手动指定策略文件：
 
 ```bash
-ARM_CONTROL_MODE=rl RL_POLICY_PATH=ros2_ws/src/version_car_sim/trained_policies/rebot_safe_ppo_lagrangian_gazebo/policy.pt ./start_car_arm.sh
+ARM_CONTROL_MODE=rl \
+RL_POLICY_PATH=/path/to/policy.pt \
+./start_car_arm.sh
 ```
 
-## 重新训练机械臂策略
+## 常用启动参数
+
+常用参数都可以通过环境变量覆盖：
+
+```bash
+LEAK_X=10.0 LEAK_Y=10.0 LEAK_Z=0.3 ./start_car_arm.sh
+TARGET_CLEARANCE=0.8 ./start_car_arm.sh
+GUI=true RVIZ=true ./start_car_arm.sh
+FAST_LIO_MODE=stub ./start_car_arm.sh
+```
+
+重要参数说明：
+
+```text
+LEAK_X / LEAK_Y / LEAK_Z              泄漏源在 map 坐标系下的位置
+TARGET_CLEARANCE                     小车外壳到泄漏源的净停车距离，默认 0.80 m
+WORK_DISTANCE                        作业距离，默认等于 TARGET_CLEARANCE
+SPRAY_STANDOFF                       喷头与泄漏点的喷洒前距，默认 0.15 m
+MIN_SPRAY_TIP_Z                      喷头最低安全高度，默认 0.24 m
+SPRAY_DURATION_SEC                   喷洒持续时间，默认 5.0 s
+RETURN_HOME_AFTER_SPRAY              喷洒后是否回 home，默认 false
+ARM_CONTROL_MODE                     机械臂控制模式，默认 rl
+RL_POLICY_PATH                       强化学习策略路径
+RL_ENABLE_TEACHER_FALLBACK           RL 失败时是否允许教师策略兜底，默认 true
+RL_MAX_STEPS                         RL 最大步数，默认 360
+RL_TIMEOUT_SEC                       RL 超时时间，默认 360.0 s
+RL_MAX_ACTION_DELTA                  RL 单步关节动作上限，默认 0.04 rad
+RL_CONTROL_RATE_HZ                   RL 控制频率，默认 8 Hz
+NAVIGATION_WAYPOINT_ENABLED          是否启用中间点导航，默认 true
+NAVIGATION_WAYPOINTS                 中间点列表，格式 x1,y1;x2,y2
+NAVIGATION_GOAL_TOLERANCE            导航到达容差，默认 0.50 m
+GUI                                  是否启动 Gazebo GUI，默认 true
+RVIZ                                 是否启动 RViz，默认 true
+SKIP_BUILD                           是否跳过构建，默认 false
+FAST_LIO_MODE                        FAST-LIO 模式，默认 stub，可设为 real
+LIVOX_WS                             Livox 工作区路径
+```
+
+自定义连续导航中间点：
+
+```bash
+NAVIGATION_WAYPOINTS="-7.0,-8.0;0.0,-7.0;5.0,-2.0" ./start_car_arm.sh
+```
+
+关闭中间点导航：
+
+```bash
+NAVIGATION_WAYPOINT_ENABLED=false ./start_car_arm.sh
+```
+
+## 只启动小车仿真
+
+```bash
+cd /home/kun/car_arm
+./start_car.sh
+```
+
+默认启动 MID360 + FAST-LIO stub + Nav2。常用参数：
+
+```bash
+GOAL_X=10.0 GOAL_Y=10.0 ./start_car.sh
+GUI=true RVIZ=true ./start_car.sh
+FAST_LIO_MODE=stub ./start_car.sh
+```
+
+如果需要真实 FAST-LIO：
+
+```bash
+FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car.sh
+```
+
+## 只启动机械臂仿真
+
+```bash
+cd /home/kun/car_arm
+./start_arm.sh
+```
+
+默认运行圆形点位运动演示：
+
+```bash
+DEMO_MODE=circle_points ./start_arm.sh
+```
+
+运行喷洒演示：
+
+```bash
+DEMO_MODE=spray LEAK_X=0.5 LEAK_Y=0.0 LEAK_Z=0.28 ./start_arm.sh
+```
+
+## 重新训练安全强化学习策略
 
 训练命令：
 
 ```bash
+cd /home/kun/car_arm
 ./train_car_arm_safe_rl.sh
 ```
 
-常用快速测试训练：
+快速测试训练：
 
 ```bash
 TEACHER_EPISODES=3 BC_UPDATES=10 ./train_car_arm_safe_rl.sh
@@ -207,173 +299,113 @@ TEACHER_EPISODES=200 BC_UPDATES=800 ./train_car_arm_safe_rl.sh
 ros2_ws/src/version_car_sim/trained_policies/rebot_safe_ppo_lagrangian_gazebo/
 ```
 
-训练完成后，`start_car_arm.sh` 会优先加载这个目录下的 `policy.pt`。
-
-## 常用参数
-
-启动时可以通过环境变量覆盖参数：
+训练完成后可直接指定新策略启动：
 
 ```bash
-LEAK_X=10.0 LEAK_Y=10.0 LEAK_Z=0.3 ./start_car_arm.sh
+ARM_CONTROL_MODE=rl \
+RL_POLICY_PATH=ros2_ws/src/version_car_sim/trained_policies/rebot_safe_ppo_lagrangian_gazebo/policy.pt \
+./start_car_arm.sh
 ```
 
-```bash
-TARGET_CLEARANCE=0.8 ./start_car_arm.sh
+## 常用话题和节点
+
+联合仿真中常见话题：
+
+```text
+/map
+/odom
+/tf
+/mid360_points
+/cmd_vel
+/plan
+/goal_pose
+/local_costmap/costmap
+/global_costmap/costmap
+/spray_action
+/mcu_frame_hex
 ```
 
-```bash
-GUI=true RVIZ=true ./start_car_arm.sh
+常见节点和功能：
+
+```text
+fast_lio_stub                         FAST-LIO stub 仿真转发
+pointcloud_to_costmap                 点云投影到 2D costmap
+nav2_waypoint_commander               Nav2 中间点连续导航
+gas_leak_mobile_manipulator_task      小车 + 机械臂任务流程
+rebot_safe_rl_controller              安全强化学习机械臂控制
+spray_simulator                       喷洒动作仿真
+cmd_vel_monitor                       速度命令监控
+trajectory_recorder                   轨迹记录
 ```
+
+## 常见问题
+
+### 1. 找不到 Nav2
+
+安装 Nav2：
+
+```bash
+sudo apt update
+sudo apt install ros-humble-navigation2 ros-humble-nav2-bringup
+```
+
+### 2. 找不到 MoveIt 或 ros2_control
+
+安装依赖：
+
+```bash
+sudo apt install ros-humble-moveit
+sudo apt install ros-humble-ros2-control ros-humble-ros2-controllers
+```
+
+### 3. FAST_LIO_MODE=real 时找不到 livox_ros_driver2
+
+确认 Livox 工作区已经编译，并指定路径：
+
+```bash
+FAST_LIO_MODE=real LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
+```
+
+如果只是运行仿真演示，使用默认 stub 模式：
 
 ```bash
 FAST_LIO_MODE=stub ./start_car_arm.sh
 ```
 
-常见参数说明：
+### 4. Gazebo / RViz / ROS2 节点残留
 
-```text
-LEAK_X / LEAK_Y / LEAK_Z       泄漏源在 map 坐标系下的位置
-TARGET_CLEARANCE              小车外壳到泄漏源的净停车距离
-ARM_CONTROL_MODE              机械臂控制模式，默认 rl
-RL_POLICY_PATH                强化学习策略文件路径
-GUI                           是否启动 Gazebo 图形界面
-RVIZ                          是否启动 RViz
-FAST_LIO_MODE                 FAST-LIO 模式，默认 stub
-```
-
-## 只编译指定包
-
-开发时可以只编译主包：
-
-```bash
-cd ros2_ws
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-colcon build --symlink-install --packages-select version_car_sim
-```
-
-## 调试命令
-
-查看 ROS2 节点：
-
-```bash
-ros2 node list
-```
-
-查看控制器：
-
-```bash
-ros2 control list_controllers
-```
-
-查看机械臂关节状态：
-
-```bash
-ros2 topic echo /joint_states
-```
-
-查看 TF：
-
-```bash
-ros2 run tf2_ros tf2_echo map base_link
-ros2 run tf2_ros tf2_echo map rebot_base_link
-```
-
-查看 Nav2 状态：
-
-```bash
-ros2 lifecycle nodes
-ros2 lifecycle get /controller_server
-ros2 lifecycle get /bt_navigator
-```
-
-查看速度话题：
-
-```bash
-ros2 topic echo /cmd_vel
-```
-
-手动测试小车底盘：
-
-```bash
-ros2 topic pub /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
-```
-
-机械臂最小动作测试：
-
-```bash
-cd ros2_ws
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-ros2 run version_car_sim rebot_arm_minimal_test --target spray_demo --duration 2.0
-```
-
-## GitHub 开源注意事项
-
-不要上传编译和运行生成目录：
-
-```text
-build/
-install/
-log/
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
-ros2_ws/sim_results/
-```
-
-这些内容已经在 `.gitignore` 中忽略。
-
-推荐上传的核心内容：
-
-```text
-start_car_arm.sh
-stop_car_arm.sh
-train_car_arm_safe_rl.sh
-start_car.sh
-start_arm.sh
-ros2_ws/
-readme.txt
-.gitignore
-```
-
-## 常见问题
-
-如果 Gazebo 没有启动，先执行：
+运行：
 
 ```bash
 ./stop_car_arm.sh
+```
+
+然后重新启动：
+
+```bash
 ./start_car_arm.sh
 ```
 
-如果提示找不到 Livox 依赖，使用：
+### 5. 重新启动后代码没有更新
+
+先清理旧进程，再重新构建：
 
 ```bash
-LIVOX_WS=/path/to/ws_livox ./start_car_arm.sh
-```
-
-如果机械臂不动，优先检查：
-
-```bash
-ros2 node list | grep rebot
-ros2 control list_controllers
-ros2 topic echo /joint_states
-```
-
-如果小车有路径但不动，检查：
-
-```bash
-ros2 topic echo /cmd_vel
-ros2 lifecycle get /controller_server
-ros2 control list_controllers
-```
-
-## 当前默认演示命令
-
-```bash
-cd car_arm
 ./stop_car_arm.sh
+cd ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install
+source install/setup.bash
+cd ..
 ./start_car_arm.sh
 ```
 
-运行后观察 Gazebo 和 RViz：小车会导航到泄漏源附近，随后车载 reBot B601-DM 机械臂会使用安全强化学习策略控制喷头靠近泄漏源上方附近并执行喷洒动作。
+## GitHub 分支
+
+当前项目上传到 GitHub 仓库：
+
+```text
+https://github.com/zhaolongkun/car_arm/tree/branch1
+```
+
+推荐在 `branch1` 分支上继续开发和提交。
